@@ -3,8 +3,9 @@
   "version": "1.0.0",
   "description": "Convert TypeScript interfaces and types to Mermaid class diagrams",
   "main": "ts-to-mermaid.ts",
+  "type": "commonjs",
   "scripts": {
-    "convert": "ts-node ts-to-mermaid.ts",
+    "convert": "ts-node --esm ts-to-mermaid.ts",
     "build": "tsc ts-to-mermaid.ts"
   },
   "dependencies": {
@@ -13,5 +14,14 @@
   "devDependencies": {
     "@types/node": "^20.0.0",
     "ts-node": "^10.9.0"
+  },
+  "ts-node": {
+    "esm": true,
+    "compilerOptions": {
+      "module": "commonjs",
+      "target": "es2020",
+      "esModuleInterop": true,
+      "allowSyntheticDefaultImports": true
+    }
   }
 }
