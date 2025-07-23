@@ -1,4 +1,4 @@
-import * as ts from 'typescript';
+import ts from 'typescript';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -30,51 +30,59 @@ interface Relationship {
 class TypeScriptToMermaid {
   private types: Map<string, TypeInfo> = new Map();
   private relationships: Relationship[] = [];
-  private visited: Set<string> = new Set();
   private sourceFile: ts.SourceFile;
-  private checker: ts.TypeChecker;
 
-  constructor(private filePath: string) {
+  constructor(filePath: string) {
     const program = ts.createProgram([filePath], {
       target: ts.ScriptTarget.Latest,
       module: ts.ModuleKind.CommonJS,
     });
-    
+
     this.sourceFile = program.getSourceFile(filePath)!;
-    this.checker = program.getTypeChecker();
-    
+
     if (!this.sourceFile) {
       throw new Error(`Could not parse file: ${filePath}`);
     }
   }
 
   analyze(): void {
-    this.visit(this.sourceFile);
-    this.detectCompositionRelationships();
+    try {
+      this.visit(this.sourceFile);
+      this.detectCompositionRelationships();
+    } catch (error) {
+      console.error('Error during analysis:', error);
+      throw error;
+    }
   }
 
   private visit(node: ts.Node): void {
-    if (ts.isInterfaceDeclaration(node)) {
-      this.processInterface(node);
-    } else if (ts.isTypeAliasDeclaration(node)) {
-      this.processTypeAlias(node);
-    } else if (ts.isEnumDeclaration(node)) {
-      this.processEnum(node);
-    } else if (ts.isClassDeclaration(node)) {
-      this.processClass(node);
+    try {
+      if (ts.isInterfaceDeclaration(node)) {
+        this.processInterface(node);
+      } else if (ts.isTypeAliasDeclaration(node)) {
+        this.processTypeAlias(node);
+      } else if (ts.isEnumDeclaration(node)) {
+        this.processEnum(node);
+      } else if (ts.isClassDeclaration(node)) {
+        this.processClass(node);
+      }
+    } catch (error) {
+      console.error('Error processing node:', node.kind, error);
+      throw error;
     }
 
     ts.forEachChild(node, (child) => this.visit(child));
   }
 
   private processInterface(node: ts.InterfaceDeclaration): void {
+    if (!node.name) return;
     const name = node.name.text;
     const typeInfo: TypeInfo = {
       name,
       kind: 'interface',
       properties: [],
       extends: [],
-      typeParameters: node.typeParameters?.map(tp => tp.name.text),
+      typeParameters: node.typeParameters?.map(tp => (tp.name as ts.Identifier)?.text).filter(Boolean),
     };
 
     // Process extends clauses
@@ -82,7 +90,7 @@ class TypeScriptToMermaid {
       for (const clause of node.heritageClauses) {
         if (clause.token === ts.SyntaxKind.ExtendsKeyword) {
           for (const type of clause.types) {
-            const extendedType = type.expression.getText();
+            const extendedType = type.expression.getText(this.sourceFile);
             typeInfo.extends!.push(extendedType);
             this.relationships.push({
               from: name,
@@ -97,9 +105,9 @@ class TypeScriptToMermaid {
     // Process properties
     node.members.forEach((member) => {
       if (ts.isPropertySignature(member) && member.name) {
-        const propName = member.name.getText();
+        const propName = member.name.getText(this.sourceFile);
         const propType = member.type ? this.getTypeString(member.type) : 'any';
-        
+
         typeInfo.properties.push({
           name: propName,
           type: propType,
@@ -113,19 +121,20 @@ class TypeScriptToMermaid {
   }
 
   private processTypeAlias(node: ts.TypeAliasDeclaration): void {
+    if (!node.name) return;
     const name = node.name.text;
     const typeInfo: TypeInfo = {
       name,
       kind: 'type',
       properties: [],
-      typeParameters: node.typeParameters?.map(tp => tp.name.text),
+      typeParameters: node.typeParameters?.map(tp => (tp.name as ts.Identifier)?.text).filter(Boolean),
     };
 
     // Handle union types
     if (ts.isUnionTypeNode(node.type)) {
       typeInfo.isUnion = true;
       typeInfo.unionTypes = node.type.types.map(t => this.getTypeString(t));
-      
+
       // Create union relationships
       typeInfo.unionTypes.forEach(unionType => {
         if (this.isCustomType(unionType)) {
@@ -137,14 +146,14 @@ class TypeScriptToMermaid {
           });
         }
       });
-    } 
+    }
     // Handle object type literals
     else if (ts.isTypeLiteralNode(node.type)) {
       node.type.members.forEach((member) => {
         if (ts.isPropertySignature(member) && member.name) {
-          const propName = member.name.getText();
+          const propName = member.name.getText(this.sourceFile);
           const propType = member.type ? this.getTypeString(member.type) : 'any';
-          
+
           typeInfo.properties.push({
             name: propName,
             type: propType,
@@ -169,6 +178,7 @@ class TypeScriptToMermaid {
   }
 
   private processEnum(node: ts.EnumDeclaration): void {
+    if (!node.name) return;
     const name = node.name.text;
     const typeInfo: TypeInfo = {
       name,
@@ -177,9 +187,9 @@ class TypeScriptToMermaid {
     };
 
     node.members.forEach((member) => {
-      const memberName = member.name?.getText() || '';
-      const memberValue = member.initializer?.getText() || '';
-      
+      const memberName = member.name?.getText(this.sourceFile) || '';
+      const memberValue = member.initializer?.getText(this.sourceFile) || '';
+
       typeInfo.properties.push({
         name: memberName,
         type: memberValue || 'number',
@@ -193,7 +203,7 @@ class TypeScriptToMermaid {
 
   private processClass(node: ts.ClassDeclaration): void {
     if (!node.name) return;
-    
+
     const name = node.name.text;
     const typeInfo: TypeInfo = {
       name,
@@ -201,7 +211,7 @@ class TypeScriptToMermaid {
       properties: [],
       extends: [],
       implements: [],
-      typeParameters: node.typeParameters?.map(tp => tp.name.text),
+      typeParameters: node.typeParameters?.map(tp => (tp.name as ts.Identifier)?.text).filter(Boolean),
     };
 
     // Process heritage clauses
@@ -209,7 +219,7 @@ class TypeScriptToMermaid {
       for (const clause of node.heritageClauses) {
         if (clause.token === ts.SyntaxKind.ExtendsKeyword) {
           for (const type of clause.types) {
-            const extendedType = type.expression.getText();
+            const extendedType = type.expression.getText(this.sourceFile);
             typeInfo.extends!.push(extendedType);
             this.relationships.push({
               from: name,
@@ -219,7 +229,7 @@ class TypeScriptToMermaid {
           }
         } else if (clause.token === ts.SyntaxKind.ImplementsKeyword) {
           for (const type of clause.types) {
-            const implementedType = type.expression.getText();
+            const implementedType = type.expression.getText(this.sourceFile);
             typeInfo.implements!.push(implementedType);
             this.relationships.push({
               from: name,
@@ -234,9 +244,9 @@ class TypeScriptToMermaid {
     // Process members
     node.members.forEach((member) => {
       if (ts.isPropertyDeclaration(member) && member.name) {
-        const propName = member.name.getText();
+        const propName = member.name.getText(this.sourceFile);
         const propType = member.type ? this.getTypeString(member.type) : 'any';
-        
+
         typeInfo.properties.push({
           name: propName,
           type: propType,
@@ -251,7 +261,7 @@ class TypeScriptToMermaid {
 
   private getTypeString(typeNode: ts.TypeNode): string {
     if (ts.isTypeReferenceNode(typeNode)) {
-      const typeName = typeNode.typeName.getText();
+      const typeName = typeNode.typeName.getText(this.sourceFile);
       // Handle array types
       if (typeNode.typeArguments && typeNode.typeArguments.length > 0) {
         const args = typeNode.typeArguments.map(arg => this.getTypeString(arg)).join(', ');
@@ -265,27 +275,27 @@ class TypeScriptToMermaid {
     } else if (ts.isIntersectionTypeNode(typeNode)) {
       return typeNode.types.map(t => this.getTypeString(t)).join(' & ');
     } else if (ts.isLiteralTypeNode(typeNode)) {
-      return typeNode.literal.getText();
+      return typeNode.literal.getText(this.sourceFile);
     } else if (ts.isFunctionTypeNode(typeNode)) {
       return 'Function';
     } else if (ts.isTypeLiteralNode(typeNode)) {
       return 'Object';
     }
-    
-    return typeNode.getText();
+
+    return typeNode.getText(this.sourceFile);
   }
 
   private detectCompositionRelationships(): void {
     for (const [typeName, typeInfo] of this.types) {
       for (const prop of typeInfo.properties) {
         const cleanType = this.extractBaseType(prop.type);
-        
+
         if (this.isCustomType(cleanType) && cleanType !== typeName) {
           // Check if relationship already exists (from extends/implements)
           const exists = this.relationships.some(
             r => r.from === typeName && r.to === cleanType && (r.type === 'extends' || r.type === 'implements')
           );
-          
+
           if (!exists) {
             this.relationships.push({
               from: typeName,
@@ -302,13 +312,13 @@ class TypeScriptToMermaid {
   private extractBaseType(type: string): string {
     // Remove array notation
     type = type.replace(/\[\]$/, '');
-    
+
     // Extract from generics (e.g., Array<User> -> User)
     const genericMatch = type.match(/^(?:Array|Promise|Observable|Subject|BehaviorSubject|ReplaySubject)<(.+)>$/);
     if (genericMatch) {
       return genericMatch[1];
     }
-    
+
     // Handle union types - return first custom type found
     if (type.includes(' | ')) {
       const unionTypes = type.split(' | ').map(t => t.trim());
@@ -318,7 +328,7 @@ class TypeScriptToMermaid {
         }
       }
     }
-    
+
     return type;
   }
 
@@ -329,17 +339,17 @@ class TypeScriptToMermaid {
       'bigint', 'Date', 'RegExp', 'Error', 'Array', 'Map', 'Set',
       'Promise', 'WeakMap', 'WeakSet'
     ]);
-    
+
     return !builtInTypes.has(type) && !type.match(/^['"].*['"]$/);
   }
 
   generateMermaid(): string {
     const lines: string[] = ['classDiagram'];
-    
+
     // Generate class definitions
     for (const [name, typeInfo] of this.types) {
       lines.push(`  class ${name} {`);
-      
+
       // Add type kind annotation
       if (typeInfo.kind === 'interface') {
         lines.push(`    <<interface>>`);
@@ -348,18 +358,18 @@ class TypeScriptToMermaid {
       } else if (typeInfo.kind === 'type' && typeInfo.isUnion) {
         lines.push(`    <<union>>`);
       }
-      
+
       // Add properties
       for (const prop of typeInfo.properties) {
         const modifier = prop.readonly ? '+' : prop.optional ? '-' : '+';
         const optional = prop.optional ? '?' : '';
         lines.push(`    ${modifier}${prop.name}${optional}: ${this.sanitizeType(prop.type)}`);
       }
-      
+
       lines.push(`  }`);
       lines.push('');
     }
-    
+
     // Generate relationships
     const relationshipMap = {
       extends: '--|>',
@@ -367,7 +377,7 @@ class TypeScriptToMermaid {
       composition: '--*',
       union: '--|',
     };
-    
+
     for (const rel of this.relationships) {
       if (this.types.has(rel.to)) {
         const arrow = relationshipMap[rel.type];
@@ -375,7 +385,7 @@ class TypeScriptToMermaid {
         lines.push(`  ${rel.from} ${arrow} ${rel.to}${label}`);
       }
     }
-    
+
     return lines.join('\n');
   }
 
@@ -405,23 +415,23 @@ export function convertTypeScriptToMermaid(filePath: string): string {
 // CLI interface
 if (require.main === module) {
   const args = process.argv.slice(2);
-  
+
   if (args.length === 0) {
     console.log('Usage: ts-node ts-to-mermaid.ts <path-to-typescript-file>');
     process.exit(1);
   }
-  
+
   const filePath = path.resolve(args[0]);
-  
+
   if (!fs.existsSync(filePath)) {
     console.error(`File not found: ${filePath}`);
     process.exit(1);
   }
-  
+
   try {
     const mermaidDiagram = convertTypeScriptToMermaid(filePath);
     console.log(mermaidDiagram);
-    
+
     // Optionally save to file
     if (args[1] === '--save') {
       const outputPath = filePath.replace(/\.ts$/, '.mermaid');

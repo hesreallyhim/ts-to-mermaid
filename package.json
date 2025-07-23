@@ -5,8 +5,8 @@
   "main": "ts-to-mermaid.ts",
   "type": "commonjs",
   "scripts": {
-    "convert": "ts-node --esm ts-to-mermaid.ts",
-    "build": "tsc ts-to-mermaid.ts"
+    "convert": "ts-node ts-to-mermaid.ts",
+    "build": "tsc"
   },
   "dependencies": {
     "typescript": "^5.0.0"
@@ -14,14 +14,5 @@
   "devDependencies": {
     "@types/node": "^20.0.0",
     "ts-node": "^10.9.0"
-  },
-  "ts-node": {
-    "esm": true,
-    "compilerOptions": {
-      "module": "commonjs",
-      "target": "es2020",
-      "esModuleInterop": true,
-      "allowSyntheticDefaultImports": true
-    }
   }
 }
