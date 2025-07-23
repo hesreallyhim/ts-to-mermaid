@@ -10,13 +10,13 @@
 interface User {
   /** Unique identifier */
   id: number;
-  
+
   /** User's full name */
   name: string;
-  
+
   // Email address for notifications
   email: string;
-  
+
   /**
    * User's role in the system
    * @deprecated Use RoleAssignment instead
@@ -47,10 +47,10 @@ enum AccountStatus {
  * const service = new UserService();
  * const user = service.getUser(123);
  */
-class UserService {
+class UserServiceTwo {
   // Internal storage of users
-  private users: User[];
-  
+  private users: User[] = [];
+
   /**
    * Gets a user by ID
    * @param {number} id - The user ID
@@ -59,9 +59,9 @@ class UserService {
   getUser(id: number): User | undefined {
     return this.users.find(u => u.id === id);
   }
-  
+
   /** Active user count */
-  activeCount: number; // Tracks active users
+  activeCount: number = 0; // Tracks active users
 }
 
 /*

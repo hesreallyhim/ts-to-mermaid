@@ -32,12 +32,12 @@ enum AnimalType {
 class AnimalShelter {
   private animals: Animal[];
   private capacity: number;
-  
+
   constructor(capacity: number) {
     this.animals = [];
     this.capacity = capacity;
   }
-  
+
   addAnimal(animal: Animal): boolean {
     if (this.animals.length < this.capacity) {
       this.animals.push(animal);
@@ -45,11 +45,11 @@ class AnimalShelter {
     }
     return false;
   }
-  
+
   findBySpecies(species: string): Animal[] {
     return this.animals.filter(a => a.species === species);
   }
-  
+
   getCount(): number {
     return this.animals.length;
   }
@@ -58,16 +58,19 @@ class AnimalShelter {
 class PetClinic implements ClinicService {
   private patients: Pet[];
   private vetName: string;
-  
+
   constructor(vetName: string) {
     this.patients = [];
     this.vetName = vetName;
   }
-  
+
   treatAnimal(pet: Pet): void {
-    this.patients.push(pet);
+    if (this.vetName) {
+      console.log(`Treating ${pet.name} at the clinic.`);
+      this.patients.push(pet);
+    }
   }
-  
+
   getPatientCount(): number {
     return this.patients.length;
   }

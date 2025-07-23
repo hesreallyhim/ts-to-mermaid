@@ -21,7 +21,7 @@ interface NumberContainer<T extends number> {
 }
 
 // Generic type alias
-type Result<T, E> = 
+type Result<T, E> =
   | { success: true; data: T }
   | { success: false; error: E };
 
@@ -31,23 +31,23 @@ type Optional<T = string> = T | undefined;
 // Generic class
 class Stack<T> {
   private items: T[];
-  
+
   constructor() {
     this.items = [];
   }
-  
+
   push(item: T): void {
     this.items.push(item);
   }
-  
+
   pop(): T | undefined {
     return this.items.pop();
   }
-  
+
   peek(): T | undefined {
     return this.items[this.items.length - 1];
   }
-  
+
   isEmpty(): boolean {
     return this.items.length === 0;
   }
@@ -81,7 +81,7 @@ interface DataStore {
 
 // Non-generic types for testing relationships
 interface User {
-  id: string;
+  id: number;
   name: string;
   email: string;
 }
@@ -102,19 +102,19 @@ interface StringOrNumberContainer<T extends string | number> {
 // Usage example with concrete types
 class UserRepository implements Container<User> {
   private user: User;
-  
+
   constructor(user: User) {
     this.user = user;
   }
-  
+
   get value(): User {
     return this.user;
   }
-  
+
   getValue(): User {
     return this.user;
   }
-  
+
   setValue(val: User): void {
     this.user = val;
   }

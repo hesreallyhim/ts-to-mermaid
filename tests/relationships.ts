@@ -3,7 +3,7 @@
 
 // Base interfaces for inheritance testing
 interface Entity {
-  id: string;
+  id: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -25,7 +25,7 @@ interface User extends Entity, Auditable {
   email: string;
   profile: UserProfile;
 }
-
+/** @ts-ignore */
 interface Admin extends User, Deletable {
   permissions: Permission[];
   role: AdminRole;
@@ -62,16 +62,16 @@ type AdminRole = "super_admin" | "moderator" | "support";
 
 // Classes implementing interfaces
 class BaseEntity implements Entity {
-  id: string;
+  id: number;
   createdAt: Date;
   updatedAt: Date;
-  
-  constructor(id: string) {
+
+  constructor(id: number) {
     this.id = id;
     this.createdAt = new Date();
     this.updatedAt = new Date();
   }
-  
+
   update(): void {
     this.updatedAt = new Date();
   }
@@ -81,22 +81,22 @@ class UserService implements CrudService<User>, Auditable {
   createdBy: string;
   updatedBy: string;
   private users: Map<string, User>;
-  
+
   constructor(actor: string) {
     this.createdBy = actor;
     this.updatedBy = actor;
     this.users = new Map();
   }
-  
+
   create(user: User): User {
-    this.users.set(user.id, user);
+    this.users.set(user.id.toString(), user);
     return user;
   }
-  
+
   read(id: string): User | undefined {
-    return this.users.get(id);
+    return this.users.get(id.toString());
   }
-  
+
   update(id: string, user: Partial<User>): User | undefined {
     const existing = this.users.get(id);
     if (existing) {
@@ -107,7 +107,7 @@ class UserService implements CrudService<User>, Auditable {
     }
     return undefined;
   }
-  
+
   delete(id: string): boolean {
     return this.users.delete(id);
   }
@@ -124,16 +124,16 @@ interface CrudService<T> {
 // Abstract class with inheritance
 abstract class BaseService<T extends Entity> {
   protected items: T[] = [];
-  
+
   abstract validate(item: T): boolean;
-  
+
   add(item: T): void {
     if (this.validate(item)) {
       this.items.push(item);
     }
   }
-  
-  findById(id: string): T | undefined {
+
+  findById(id: number): T | undefined {
     return this.items.find(item => item.id === id);
   }
 }

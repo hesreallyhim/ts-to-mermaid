@@ -15,15 +15,15 @@ export enum Status {
 }
 
 export class UserService {
-  private users: User[];
-  
+  private users: User[] = [];
+
   getUser(id: number): User | undefined {
     return this.users.find(u => u.id === id);
   }
 }
 
 export default class DefaultExport {
-  value: string;
+  value: string = 'default';
 }
 
 // Named exports with renaming
