@@ -135,17 +135,8 @@ class TypeScriptToMermaid {
       typeInfo.isUnion = true;
       typeInfo.unionTypes = node.type.types.map(t => this.getTypeString(t));
 
-      // Create union relationships
-      typeInfo.unionTypes.forEach(unionType => {
-        if (this.isCustomType(unionType)) {
-          this.relationships.push({
-            from: name,
-            to: unionType,
-            type: 'union',
-            label: 'union',
-          });
-        }
-      });
+      // Skip creating union relationships since we're rendering as enumeration
+      // This keeps the diagram cleaner
     }
     // Handle object type literals
     else if (ts.isTypeLiteralNode(node.type)) {
@@ -356,14 +347,22 @@ class TypeScriptToMermaid {
       } else if (typeInfo.kind === 'enum') {
         lines.push(`    <<enumeration>>`);
       } else if (typeInfo.kind === 'type' && typeInfo.isUnion) {
-        lines.push(`    <<union>>`);
+        lines.push(`    <<enumeration>>`);
       }
 
-      // Add properties
-      for (const prop of typeInfo.properties) {
-        const modifier = prop.readonly ? '+' : prop.optional ? '-' : '+';
-        const optional = prop.optional ? '?' : '';
-        lines.push(`    ${modifier}${prop.name}${optional}: ${this.sanitizeType(prop.type)}`);
+      // Add properties or union members
+      if (typeInfo.isUnion && typeInfo.unionTypes) {
+        // For unions, display members as enum values
+        for (const unionType of typeInfo.unionTypes) {
+          lines.push(`    ${unionType}`);
+        }
+      } else {
+        // Regular properties
+        for (const prop of typeInfo.properties) {
+          const modifier = prop.readonly ? '+' : prop.optional ? '-' : '+';
+          const optional = prop.optional ? '?' : '';
+          lines.push(`    ${modifier}${prop.name}${optional}: ${this.sanitizeType(prop.type)}`);
+        }
       }
 
       lines.push(`  }`);
