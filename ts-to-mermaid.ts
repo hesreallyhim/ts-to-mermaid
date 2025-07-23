@@ -417,7 +417,7 @@ if (require.main === module) {
   const args = process.argv.slice(2);
 
   if (args.length === 0) {
-    console.log('Usage: ts-node ts-to-mermaid.ts <path-to-typescript-file>');
+    console.log('Usage: ts-node ts-to-mermaid.ts <path-to-typescript-file> [--save [output-directory]]');
     process.exit(1);
   }
 
@@ -433,8 +433,27 @@ if (require.main === module) {
     console.log(mermaidDiagram);
 
     // Optionally save to file
-    if (args[1] === '--save') {
-      const outputPath = filePath.replace(/\.ts$/, '.mermaid');
+    const saveIndex = args.indexOf('--save');
+    if (saveIndex !== -1) {
+      let outputPath: string;
+      
+      // Check if a directory was specified after --save
+      if (saveIndex + 1 < args.length && !args[saveIndex + 1].startsWith('--')) {
+        const outputDir = path.resolve(args[saveIndex + 1]);
+        
+        // Create directory if it doesn't exist
+        if (!fs.existsSync(outputDir)) {
+          fs.mkdirSync(outputDir, { recursive: true });
+        }
+        
+        // Generate output filename in the specified directory
+        const basename = path.basename(filePath).replace(/\.ts$/, '.mermaid');
+        outputPath = path.join(outputDir, basename);
+      } else {
+        // Default behavior: save in the same directory as the input file
+        outputPath = filePath.replace(/\.ts$/, '.mermaid');
+      }
+      
       fs.writeFileSync(outputPath, mermaidDiagram);
       console.log(`\nSaved to: ${outputPath}`);
     }

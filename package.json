@@ -6,7 +6,8 @@
   "type": "commonjs",
   "scripts": {
     "convert": "ts-node ts-to-mermaid.ts",
-    "build": "tsc"
+    "build": "tsc",
+    "test": "for file in tests/*.ts; do echo \"Converting $file...\"; ts-node ts-to-mermaid.ts \"$file\" --save tests/outputs; done"
   },
   "dependencies": {
     "typescript": "^5.0.0"
