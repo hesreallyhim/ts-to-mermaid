@@ -1,0 +1,17 @@
+{
+  "name": "ts-to-mermaid",
+  "version": "1.0.0",
+  "description": "Convert TypeScript interfaces and types to Mermaid class diagrams",
+  "main": "ts-to-mermaid.ts",
+  "scripts": {
+    "convert": "ts-node ts-to-mermaid.ts",
+    "build": "tsc ts-to-mermaid.ts"
+  },
+  "dependencies": {
+    "typescript": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "ts-node": "^10.9.0"
+  }
+}
