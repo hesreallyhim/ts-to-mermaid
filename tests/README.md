@@ -108,6 +108,11 @@ This document describes the purpose of each test file in the test suite for the 
 - **Rationale**: Real codebases often have circular dependencies that need proper handling
 - **Expected Output**: Diagram should handle cycles without infinite loops
 
+### 6. **compilation-errors.ts** (Temporary Test File)
+- **Purpose**: Test error recovery for non-compiling TypeScript files
+- **Rationale**: Developers often need to visualize code that has errors or is work-in-progress
+- **Expected Output**: Partial diagram with error report comments, processing continues despite errors
+
 ## Validation Strategy
 
 For each test file:

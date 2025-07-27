@@ -31,18 +31,31 @@ class TypeScriptToMermaid {
   private types: Map<string, TypeInfo> = new Map();
   private relationships: Relationship[] = [];
   private sourceFile: ts.SourceFile;
+  private errors: Array<{node?: ts.Node, message: string}> = [];
+  private program: ts.Program;
 
   constructor(filePath: string) {
-    const program = ts.createProgram([filePath], {
+    this.program = ts.createProgram([filePath], {
       target: ts.ScriptTarget.Latest,
       module: ts.ModuleKind.CommonJS,
+      allowJs: true,
+      noEmit: true,
+      skipLibCheck: true,
+      noResolve: true, // Don't resolve imports
     });
 
-    this.sourceFile = program.getSourceFile(filePath)!;
+    this.sourceFile = this.program.getSourceFile(filePath)!;
 
     if (!this.sourceFile) {
       throw new Error(`Could not parse file: ${filePath}`);
     }
+
+    // Collect any diagnostics
+    const diagnostics = ts.getPreEmitDiagnostics(this.program, this.sourceFile);
+    diagnostics.forEach(diagnostic => {
+      const message = ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n');
+      this.errors.push({ message: `TS${diagnostic.code}: ${message}` });
+    });
   }
 
   analyze(): void {
@@ -51,7 +64,8 @@ class TypeScriptToMermaid {
       this.detectCompositionRelationships();
     } catch (error) {
       console.error('Error during analysis:', error);
-      throw error;
+      this.errors.push({ message: `Analysis error: ${error}` });
+      // Continue processing despite errors
     }
   }
 
@@ -67,8 +81,13 @@ class TypeScriptToMermaid {
         this.processClass(node);
       }
     } catch (error) {
-      console.error('Error processing node:', node.kind, error);
-      throw error;
+      const nodeName = (node as any).name?.text || 'unknown';
+      console.error(`Error processing ${ts.SyntaxKind[node.kind]} '${nodeName}':`, error);
+      this.errors.push({ 
+        node, 
+        message: `Failed to process ${ts.SyntaxKind[node.kind]} '${nodeName}': ${error}` 
+      });
+      // Continue processing other nodes
     }
 
     ts.forEachChild(node, (child) => this.visit(child));
@@ -344,6 +363,18 @@ class TypeScriptToMermaid {
     lines.push('  %% --* : Composition (has/contains)');
     lines.push('  %% -- : Association');
     lines.push('');
+
+    // Add error summary if there were errors
+    if (this.errors.length > 0) {
+      lines.push('  %% Errors encountered during conversion:');
+      this.errors.slice(0, 5).forEach(err => {
+        lines.push(`  %% - ${err.message.replace(/\n/g, ' ')}`);
+      });
+      if (this.errors.length > 5) {
+        lines.push(`  %% ... and ${this.errors.length - 5} more errors`);
+      }
+      lines.push('');
+    }
 
     // Generate class definitions
     for (const [name, typeInfo] of this.types) {
