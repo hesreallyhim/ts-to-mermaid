@@ -3,6 +3,11 @@
   "version": "1.0.0",
   "description": "Convert TypeScript interfaces and types to Mermaid class diagrams",
   "main": "ts-to-mermaid.ts",
+  "author": {
+    "name": "Really Him",
+    "email": "hesreallyhim@proton.me"
+  },
+  "license": "MIT",
   "type": "commonjs",
   "scripts": {
     "convert": "ts-node ts-to-mermaid.ts",
