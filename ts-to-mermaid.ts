@@ -43,6 +43,7 @@ class TypeScriptToMermaid {
   private sourceFile: ts.SourceFile;
   private errors: Array<{node?: ts.Node, message: string}> = [];
   private program: ts.Program;
+  private notes: Array<{forClass: string, content: string}> = [];
 
   constructor(filePath: string) {
     this.program = ts.createProgram([filePath], {
@@ -235,6 +236,15 @@ class TypeScriptToMermaid {
         readonly: false,
       });
     }
+    // Handle template literal types as complex
+    else if (ts.isTemplateLiteralTypeNode(node.type)) {
+      typeInfo.isUnion = true;
+      typeInfo.unionTypes = [this.getTypeString(node.type)];
+      typeInfo.unionMetadata = {
+        kind: 'complex',
+        rawType: this.getTypeString(node.type)
+      };
+    }
 
     // Use original name as key for relationships to work correctly
     const originalName = name.replace(' [AUTO-FIXED]', '');
@@ -365,9 +375,12 @@ class TypeScriptToMermaid {
       if (metadata.kind === 'simple' || metadata.kind === 'primitive') {
         // Inline simple unions directly in property type
         return typeNode.types.map(t => this.getTypeString(t)).join(' | ');
+      } else if (metadata.kind === 'complex') {
+        // For complex unions in properties, we'll use a placeholder and add a note
+        // This will be handled later when we process the containing type
+        return 'ComplexUnion';
       } else {
-        // For complex unions, just use the type name if it's a reference
-        // Otherwise fall back to regular string representation
+        // For other unions (large, discriminated), use regular string representation
         return this.getTypeString(typeNode);
       }
     }
@@ -739,13 +752,20 @@ class TypeScriptToMermaid {
             }
             break;
             
-          case 'complex':
-            // For complex unions, we'll add note support in Phase 2
-            // For now, fall back to enumeration
-            for (const unionType of typeInfo.unionTypes) {
-              lines.push(`    ${unionType}`);
+          case 'complex': {
+            // For complex unions, add a placeholder property and create a note
+            const complexUnionName = typeInfo.name;
+            lines.push(`    +value: ${complexUnionName}`);
+            
+            // Add note with the full union definition
+            if (typeInfo.unionMetadata.rawType) {
+              this.notes.push({
+                forClass: className,
+                content: `${complexUnionName} = ${typeInfo.unionMetadata.rawType}`
+              });
             }
             break;
+          }
         }
       } else if (typeInfo.isUnion && typeInfo.unionTypes) {
         // Fallback for unions without metadata (shouldn't happen)
@@ -781,6 +801,13 @@ class TypeScriptToMermaid {
       }
     }
     
+    // Generate notes for complex unions
+    if (this.notes.length > 0) {
+      lines.push('');
+      for (const note of this.notes) {
+        lines.push(`  note for ${note.forClass} "${note.content}"`);
+      }
+    }
 
     return lines.join('\n');
   }

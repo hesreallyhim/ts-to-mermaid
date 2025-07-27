@@ -37,16 +37,12 @@ classDiagram
 
   class AllColors {
     <<enumeration>>
-    PrimaryColor
-    SecondaryColor
+    +value: AllColors
   }
 
   class OptionalStatus {
     <<enumeration>>
-    "success"
-    "error"
-    "loading"
-    undefined
+    +value: OptionalStatus
   }
 
   class NullableResult {
@@ -141,3 +137,6 @@ classDiagram
   RequestConfig --* HttpMethod : method
   RequestConfig --* ApiEndpoint : endpoint
   RequestConfig --* OptionalStatus : status
+
+  note for AllColors "AllColors = PrimaryColor | SecondaryColor"
+  note for OptionalStatus "OptionalStatus = "success" | "error" | "loading" | undefined"

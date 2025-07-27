@@ -120,16 +120,12 @@ classDiagram
 
   class MultiDiscriminator {
     <<enumeration>>
-    Object
-    Object
-    Object
+    +value: MultiDiscriminator
   }
 
   class NotDiscriminated {
     <<enumeration>>
-    Object
-    Object
-    Object
+    +value: NotDiscriminated
   }
 
   CircleShape ..|> Shape
@@ -145,3 +141,6 @@ classDiagram
   CatAnimal ..|> Animal
   BirdAnimal ..|> Animal
   ShapeContainer --* Shape : shape
+
+  note for MultiDiscriminator "MultiDiscriminator = Object | Object | Object"
+  note for NotDiscriminated "NotDiscriminated = Object | Object | Object"

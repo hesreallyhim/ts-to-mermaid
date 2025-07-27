@@ -87,6 +87,8 @@ classDiagram
   }
 
   class EventHandlerName {
+    <<enumeration>>
+    +value: EventHandlerName
   }
 
   class Handler {
@@ -210,9 +212,7 @@ classDiagram
 
   class Union {
     <<enumeration>>
-    Object
-    Object
-    Object
+    +value: Union
   }
 
   class Intersection {
@@ -222,3 +222,6 @@ classDiagram
   ADDAction ..|> Action
   REMOVEAction ..|> Action
   UPDATEAction ..|> Action
+
+  note for EventHandlerName "EventHandlerName = `on${Capitalize<T>}`"
+  note for Union "Union = Object | Object | Object"

@@ -84,9 +84,7 @@ classDiagram
 
   class BrokenAlias {
     <<enumeration>>
-    UndefinedTypeA
-    UndefinedTypeB
-    string
+    +value: BrokenAlias
   }
 
   class InternalInterface {
@@ -134,3 +132,5 @@ classDiagram
 
   ValidProduct --* ValidUser : owner
   ValidService --* ValidUser : users
+
+  note for BrokenAlias "BrokenAlias = UndefinedTypeA | UndefinedTypeB | string"

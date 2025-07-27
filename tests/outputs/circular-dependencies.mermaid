@@ -110,12 +110,7 @@ classDiagram
 
   class JSONValue {
     <<enumeration>>
-    string
-    number
-    boolean
-    null
-    JSONObject
-    JSONArray
+    +value: JSONValue
   }
 
   class JSONObject {
@@ -163,11 +158,7 @@ classDiagram
 
   class Expression {
     <<enumeration>>
-    NumberLiteral
-    StringLiteral
-    BinaryExpression
-    UnaryExpression
-    ConditionalExpression
+    +value: Expression
   }
 
   class NumberLiteral {
@@ -250,3 +241,6 @@ classDiagram
   Department --* Employee : manager
   Department --* Employee : employees
   Employee --* Department : department
+
+  note for JSONValue "JSONValue = string | number | boolean | null | JSONObject | JSONArray"
+  note for Expression "Expression = NumberLiteral | StringLiteral | BinaryExpression | UnaryExpression | ConditionalExpression"

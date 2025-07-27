@@ -7,10 +7,7 @@ classDiagram
 
   class JSONRPCMessage {
     <<enumeration>>
-    JSONRPCRequest
-    JSONRPCNotification
-    JSONRPCResponse
-    JSONRPCError
+    +value: JSONRPCMessage
   }
 
   class ProgressToken {
@@ -291,7 +288,7 @@ classDiagram
   class EmbeddedResource {
     <<interface>>
     +type: "resource"
-    +resource: TextResourceContents or BlobResourceContents
+    +resource: ComplexUnion
     -annotations?: Annotations
     -_meta?: Object
   }
@@ -380,13 +377,13 @@ classDiagram
   class CreateMessageResult {
     <<interface>>
     +model: string
-    -stopReason?: "endTurn" or "stopSequence" or "maxTokens" or string
+    -stopReason?: ComplexUnion
   }
 
   class SamplingMessage {
     <<interface>>
     +role: Role
-    +content: TextContent or ImageContent or AudioContent
+    +content: ComplexUnion
   }
 
   class Annotations {
@@ -398,11 +395,7 @@ classDiagram
 
   class ContentBlock {
     <<enumeration>>
-    TextContent
-    ImageContent
-    AudioContent
-    ResourceLink
-    EmbeddedResource
+    +value: ContentBlock
   }
 
   class TextContent {
@@ -496,10 +489,7 @@ classDiagram
 
   class PrimitiveSchemaDefinition {
     <<enumeration>>
-    StringSchema
-    NumberSchema
-    BooleanSchema
-    EnumSchema
+    +value: PrimitiveSchemaDefinition
   }
 
   class StringSchema {
@@ -546,68 +536,32 @@ classDiagram
 
   class ClientRequest {
     <<enumeration>>
-    PingRequest
-    InitializeRequest
-    CompleteRequest
-    SetLevelRequest
-    GetPromptRequest
-    ListPromptsRequest
-    ListResourcesRequest
-    ListResourceTemplatesRequest
-    ReadResourceRequest
-    SubscribeRequest
-    UnsubscribeRequest
-    CallToolRequest
-    ListToolsRequest
+    +value: ClientRequest
   }
 
   class ClientNotification {
     <<enumeration>>
-    CancelledNotification
-    ProgressNotification
-    InitializedNotification
-    RootsListChangedNotification
+    +value: ClientNotification
   }
 
   class ClientResult {
     <<enumeration>>
-    EmptyResult
-    CreateMessageResult
-    ListRootsResult
-    ElicitResult
+    +value: ClientResult
   }
 
   class ServerRequest {
     <<enumeration>>
-    PingRequest
-    CreateMessageRequest
-    ListRootsRequest
-    ElicitRequest
+    +value: ServerRequest
   }
 
   class ServerNotification {
     <<enumeration>>
-    CancelledNotification
-    ProgressNotification
-    LoggingMessageNotification
-    ResourceUpdatedNotification
-    ResourceListChangedNotification
-    ToolListChangedNotification
-    PromptListChangedNotification
+    +value: ServerNotification
   }
 
   class ServerResult {
     <<enumeration>>
-    EmptyResult
-    InitializeResult
-    CompleteResult
-    GetPromptResult
-    ListPromptsResult
-    ListResourceTemplatesResult
-    ListResourcesResult
-    ReadResourceResult
-    CallToolResult
-    ListToolsResult
+    +value: ServerResult
   }
 
   JSONRPCRequest --|> Request
@@ -679,16 +633,24 @@ classDiagram
   Prompt --* PromptArgument : arguments
   PromptMessage --* Role : role
   PromptMessage --* ContentBlock : content
-  EmbeddedResource --* TextResourceContents : resource
   EmbeddedResource --* Annotations : annotations
   ListToolsResult --* Tool : tools
   CallToolResult --* ContentBlock : content
   Tool --* ToolAnnotations : annotations
   SamplingMessage --* Role : role
-  SamplingMessage --* TextContent : content
   Annotations --* Role : audience
   TextContent --* Annotations : annotations
   ImageContent --* Annotations : annotations
   AudioContent --* Annotations : annotations
   ModelPreferences --* ModelHint : hints
   ListRootsResult --* Root : roots
+
+  note for JSONRPCMessage "JSONRPCMessage = JSONRPCRequest | JSONRPCNotification | JSONRPCResponse | JSONRPCError"
+  note for ContentBlock "ContentBlock = TextContent | ImageContent | AudioContent | ResourceLink | EmbeddedResource"
+  note for PrimitiveSchemaDefinition "PrimitiveSchemaDefinition = StringSchema | NumberSchema | BooleanSchema | EnumSchema"
+  note for ClientRequest "ClientRequest = PingRequest | InitializeRequest | CompleteRequest | SetLevelRequest | GetPromptRequest | ListPromptsRequest | ListResourcesRequest | ListResourceTemplatesRequest | ReadResourceRequest | SubscribeRequest | UnsubscribeRequest | CallToolRequest | ListToolsRequest"
+  note for ClientNotification "ClientNotification = CancelledNotification | ProgressNotification | InitializedNotification | RootsListChangedNotification"
+  note for ClientResult "ClientResult = EmptyResult | CreateMessageResult | ListRootsResult | ElicitResult"
+  note for ServerRequest "ServerRequest = PingRequest | CreateMessageRequest | ListRootsRequest | ElicitRequest"
+  note for ServerNotification "ServerNotification = CancelledNotification | ProgressNotification | LoggingMessageNotification | ResourceUpdatedNotification | ResourceListChangedNotification | ToolListChangedNotification | PromptListChangedNotification"
+  note for ServerResult "ServerResult = EmptyResult | InitializeResult | CompleteResult | GetPromptResult | ListPromptsResult | ListResourceTemplatesResult | ListResourcesResult | ReadResourceResult | CallToolResult | ListToolsResult"

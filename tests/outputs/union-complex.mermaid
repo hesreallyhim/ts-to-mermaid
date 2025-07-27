@@ -1,0 +1,180 @@
+classDiagram
+  %% Legend
+  %% --|> : Inheritance (extends)
+  %% ..|> : Implementation (implements)
+  %% --* : Composition (has/contains)
+  %% -- : Association
+
+  %% Errors encountered during conversion:
+  %% - TS2687: All declarations of 'status' must have identical modifiers.
+
+  class MixedData {
+    <<enumeration>>
+    +value: MixedData
+  }
+
+  class AutoMode {
+    <<enumeration>>
+    +value: AutoMode
+  }
+
+  class LoadingState {
+    <<enumeration>>
+    +value: LoadingState
+  }
+
+  class EventPattern {
+    <<enumeration>>
+    +value: EventPattern
+  }
+
+  class RoutePattern {
+    <<enumeration>>
+    +value: RoutePattern
+  }
+
+  class Prefix {
+    <<enumeration>>
+    +value: Prefix
+  }
+
+  class CombinedType {
+    <<enumeration>>
+    +value: CombinedType
+  }
+
+  class UserAccess {
+    <<enumeration>>
+    +value: UserAccess
+  }
+
+  class ConfigOption {
+    <<enumeration>>
+    +value: ConfigOption
+  }
+
+  class Handler {
+    <<enumeration>>
+    +value: Handler
+  }
+
+  class AsyncOperation {
+    <<enumeration>>
+    +value: AsyncOperation
+  }
+
+  class NestedUnion {
+    <<enumeration>>
+    +value: NestedUnion
+  }
+
+  class DeepNested {
+    <<enumeration>>
+    +value: DeepNested
+  }
+
+  class ValueOrArray {
+    <<enumeration>>
+    +value: ValueOrArray
+  }
+
+  class Nullable {
+    <<enumeration>>
+    +value: Nullable
+  }
+
+  class DataProcessor {
+    <<interface>>
+    +data: MixedData
+    +handler: Handler
+    +pattern: EventPattern
+  }
+
+  class User {
+    <<interface>>
+    +id: string
+    +name: string
+  }
+
+  class Admin {
+    <<interface>>
+    +role: string
+    +permissions: stringArray~~
+  }
+
+  class CustomType {
+    <<interface>>
+    +value: any
+  }
+
+  class Response {
+    <<interface>>
+    +status: number
+    +body: string
+  }
+
+  class A {
+    <<interface>>
+    +a: string
+  }
+
+  class B {
+    <<interface>>
+    +b: number
+  }
+
+  class C {
+    <<interface>>
+    +c: boolean
+  }
+
+  class D {
+    <<interface>>
+    +d: Date
+  }
+
+  class E {
+    <<interface>>
+    +e: Error
+  }
+
+  class BaseUser {
+    <<interface>>
+    +id: string
+    +name: string
+  }
+
+  class Guest {
+    <<interface>>
+    +sessionId: string
+  }
+
+  class Config {
+    <<interface>>
+    +settings: object
+  }
+
+  class DefaultConfig {
+    <<interface>>
+    +defaults: object
+  }
+
+  DataProcessor --* MixedData : data
+  DataProcessor --* Handler : handler
+  DataProcessor --* EventPattern : pattern
+
+  note for MixedData "MixedData = string | number | User | Object | null"
+  note for AutoMode "AutoMode = "auto" | number | CustomType"
+  note for LoadingState "LoadingState = "loading" | "error" | Response"
+  note for EventPattern "EventPattern = `on${Capitalize<string>}`"
+  note for RoutePattern "RoutePattern = `/api/${string}/${number}`"
+  note for Prefix "Prefix = `prefix_${T}`"
+  note for CombinedType "CombinedType = (A & B) | C"
+  note for UserAccess "UserAccess = (BaseUser & Admin) | Guest"
+  note for ConfigOption "ConfigOption = (Config & { readonly: true }) | DefaultConfig"
+  note for Handler "Handler = ((x: string) => void) | ((x: number) => void)"
+  note for AsyncOperation "AsyncOperation = Promise<T> | (() => Promise<T>)"
+  note for NestedUnion "NestedUnion = (string | number) | (User | Admin)"
+  note for DeepNested "DeepNested = (A | B) | (C | D) | E"
+  note for ValueOrArray "ValueOrArray = T | T[]"
+  note for Nullable "Nullable = T | null | undefined"
