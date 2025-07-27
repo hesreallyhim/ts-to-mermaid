@@ -337,6 +337,14 @@ class TypeScriptToMermaid {
   generateMermaid(): string {
     const lines: string[] = ['classDiagram'];
 
+    // Add legend/key
+    lines.push('  %% Legend');
+    lines.push('  %% --|> : Inheritance (extends)');
+    lines.push('  %% ..|> : Implementation (implements)');
+    lines.push('  %% --* : Composition (has/contains)');
+    lines.push('  %% -- : Association');
+    lines.push('');
+
     // Generate class definitions
     for (const [name, typeInfo] of this.types) {
       lines.push(`  class ${name} {`);
@@ -348,6 +356,8 @@ class TypeScriptToMermaid {
         lines.push(`    <<enumeration>>`);
       } else if (typeInfo.kind === 'type' && typeInfo.isUnion) {
         lines.push(`    <<enumeration>>`);
+      } else if (typeInfo.kind === 'class') {
+        lines.push(`    <<class>>`);
       }
 
       // Add properties or union members
