@@ -1,0 +1,21 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "Running pre-commit checks..."
+
+# Run linting
+echo "Running ESLint..."
+npm run lint || {
+  echo "❌ ESLint failed. Please fix linting errors before committing."
+  exit 1
+}
+
+# Run tests and check for uncommitted changes
+echo "Running tests and checking for uncommitted mermaid outputs..."
+npm run test:check || {
+  echo "❌ Test outputs have changed. Please review and commit the changes to tests/outputs/*.mermaid"
+  echo "Run 'git diff tests/outputs/' to see the changes"
+  exit 1
+}
+
+echo "✅ All pre-commit checks passed!"

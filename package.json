@@ -34,14 +34,21 @@
   "scripts": {
     "convert": "ts-node ts-to-mermaid.ts",
     "build": "tsc",
-    "prepare": "npm run build",
-    "test": "for file in tests/*.ts; do echo \"Converting $file...\"; ts-node ts-to-mermaid.ts \"$file\" --save tests/outputs; done"
+    "prepare": "npm run build && husky install",
+    "test": "for file in tests/*.ts; do echo \"Converting $file...\"; ts-node ts-to-mermaid.ts \"$file\" --save tests/outputs; done",
+    "lint": "eslint . --ext .ts",
+    "lint:fix": "eslint . --ext .ts --fix",
+    "test:check": "npm run test && git diff --exit-code tests/outputs/*.mermaid"
   },
   "dependencies": {
     "typescript": "^5.0.0"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.0.0",
+    "husky": "^8.0.0",
     "ts-node": "^10.9.0"
   }
 }
