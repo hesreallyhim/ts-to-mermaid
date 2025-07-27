@@ -7,7 +7,7 @@ classDiagram
 
   class ColorName {
     <<enumeration>>
-    "red" | "green" | "blue" | "yellow"
+    "blue" | "green" | "red" | "yellow"
   }
 
   class Priority {
@@ -17,22 +17,23 @@ classDiagram
 
   class Status {
     <<enumeration>>
+    <<type>>
     "active" | "inactive" | "pending" | 404 | 503
   }
 
   class Toggle {
     <<enumeration>>
-    true | false
+    false | true
   }
 
   class PrimaryColor {
     <<enumeration>>
-    "red" | "green" | "blue"
+    "blue" | "green" | "red"
   }
 
   class SecondaryColor {
     <<enumeration>>
-    "orange" | "purple" | "green"
+    "green" | "orange" | "purple"
   }
 
   class AllColors {
@@ -42,12 +43,13 @@ classDiagram
 
   class OptionalStatus {
     <<enumeration>>
-    +value: OptionalStatus
+    <<type>>
+    "error" | "loading" | "success" | undefined
   }
 
   class NullableResult {
     <<enumeration>>
-    string | number | null
+    null | number | string
   }
 
   class ApiResponse {
@@ -107,12 +109,12 @@ classDiagram
 
   class HttpMethod {
     <<enumeration>>
-    "GET" | "POST" | "PUT" | "DELETE" | "PATCH"
+    "DELETE" | "GET" | "PATCH" | "POST" | "PUT"
   }
 
   class ApiEndpoint {
     <<enumeration>>
-    "/users" | "/posts" | "/comments"
+    "/comments" | "/posts" | "/users"
   }
 
   class RequestConfig {
@@ -139,4 +141,3 @@ classDiagram
   RequestConfig --* OptionalStatus : status
 
   note for AllColors "AllColors = PrimaryColor | SecondaryColor"
-  note for OptionalStatus "OptionalStatus = "success" | "error" | "loading" | undefined"

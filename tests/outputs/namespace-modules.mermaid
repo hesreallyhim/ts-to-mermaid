@@ -18,7 +18,7 @@ classDiagram
 
   class LogLevel {
     <<enumeration>>
-    "info" | "warn" | "error" | "debug"
+    "debug" | "error" | "info" | "warn"
   }
 
   class LogFormat {
@@ -46,7 +46,7 @@ classDiagram
 
   class UserRole {
     <<enumeration>>
-    "admin" | "user" | "guest"
+    "admin" | "guest" | "user"
   }
 
   class UserService {
@@ -116,7 +116,7 @@ classDiagram
 
   class ID {
     <<enumeration>>
-    string | number
+    number | string
   }
 
   class Timestamp {

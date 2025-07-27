@@ -44,6 +44,7 @@ class TypeScriptToMermaid {
   private errors: Array<{node?: ts.Node, message: string}> = [];
   private program: ts.Program;
   private notes: Array<{forClass: string, content: string}> = [];
+  private unionUsageCount: Map<string, number> = new Map();
 
   constructor(filePath: string) {
     this.program = ts.createProgram([filePath], {
@@ -73,6 +74,7 @@ class TypeScriptToMermaid {
     try {
       this.visit(this.sourceFile);
       this.detectCompositionRelationships();
+      this.detectReusableUnions();
     } catch (error) {
       console.error('Error during analysis:', error);
       this.errors.push({ message: `Analysis error: ${error}` });
@@ -727,44 +729,52 @@ class TypeScriptToMermaid {
 
       // Add properties or union members
       if (typeInfo.isUnion && typeInfo.unionTypes && typeInfo.unionMetadata) {
-        // Handle different union types based on classification
-        switch (typeInfo.unionMetadata.kind) {
-          case 'simple':
-          case 'primitive': {
-            // For simple/primitive unions, show inline in type definition
-            const inlineUnion = typeInfo.unionTypes.join(' | ');
-            lines.push(`    ${inlineUnion}`);
-            break;
-          }
-            
-          case 'large':
-            // For large unions, use enumeration
-            for (const unionType of typeInfo.unionTypes) {
-              lines.push(`    ${unionType}`);
+        // Check if this is a reusable union
+        if (typeInfo.unionMetadata.isReusable) {
+          // For reusable unions, add stereotype and show union inline
+          lines.push(`    <<type>>`);
+          const inlineUnion = typeInfo.unionTypes.join(' | ');
+          lines.push(`    ${inlineUnion}`);
+        } else {
+          // Handle different union types based on classification
+          switch (typeInfo.unionMetadata.kind) {
+            case 'simple':
+            case 'primitive': {
+              // For simple/primitive unions, show inline in type definition
+              const inlineUnion = typeInfo.unionTypes.join(' | ');
+              lines.push(`    ${inlineUnion}`);
+              break;
             }
-            break;
-            
-          case 'discriminated':
-            // For discriminated unions, we'll handle them differently
-            // For now, show as enumeration until we implement full support
-            for (const unionType of typeInfo.unionTypes) {
-              lines.push(`    ${unionType}`);
+              
+            case 'large':
+              // For large unions, use enumeration
+              for (const unionType of typeInfo.unionTypes) {
+                lines.push(`    ${unionType}`);
+              }
+              break;
+              
+            case 'discriminated':
+              // For discriminated unions, we'll handle them differently
+              // For now, show as enumeration until we implement full support
+              for (const unionType of typeInfo.unionTypes) {
+                lines.push(`    ${unionType}`);
+              }
+              break;
+              
+            case 'complex': {
+              // For complex unions, add a placeholder property and create a note
+              const complexUnionName = typeInfo.name;
+              lines.push(`    +value: ${complexUnionName}`);
+              
+              // Add note with the full union definition
+              if (typeInfo.unionMetadata.rawType) {
+                this.notes.push({
+                  forClass: className,
+                  content: `${complexUnionName} = ${typeInfo.unionMetadata.rawType}`
+                });
+              }
+              break;
             }
-            break;
-            
-          case 'complex': {
-            // For complex unions, add a placeholder property and create a note
-            const complexUnionName = typeInfo.name;
-            lines.push(`    +value: ${complexUnionName}`);
-            
-            // Add note with the full union definition
-            if (typeInfo.unionMetadata.rawType) {
-              this.notes.push({
-                forClass: className,
-                content: `${complexUnionName} = ${typeInfo.unionMetadata.rawType}`
-              });
-            }
-            break;
           }
         }
       } else if (typeInfo.isUnion && typeInfo.unionTypes) {
@@ -821,6 +831,35 @@ class TypeScriptToMermaid {
       .replace(/&/g, 'and')
       .replace(/\[/g, 'Array~')
       .replace(/\]/g, '~');
+  }
+
+  private detectReusableUnions(): void {
+    // First pass: count union usage across all properties
+    for (const [, typeInfo] of this.types) {
+      for (const prop of typeInfo.properties) {
+        // Check if property type is a union type alias
+        if (this.types.has(prop.type)) {
+          const propTypeInfo = this.types.get(prop.type);
+          if (propTypeInfo?.isUnion && propTypeInfo.unionTypes) {
+            const unionKey = propTypeInfo.unionTypes.sort().join('|');
+            this.unionUsageCount.set(unionKey, (this.unionUsageCount.get(unionKey) || 0) + 1);
+          }
+        }
+      }
+    }
+
+    // Second pass: mark unions used more than once as reusable
+    for (const [, typeInfo] of this.types) {
+      if (typeInfo.isUnion && typeInfo.unionTypes && typeInfo.unionMetadata) {
+        const unionKey = typeInfo.unionTypes.sort().join('|');
+        const usageCount = this.unionUsageCount.get(unionKey) || 0;
+        
+        // Mark as reusable if used more than once
+        if (usageCount > 1) {
+          typeInfo.unionMetadata.isReusable = true;
+        }
+      }
+    }
   }
 }
 

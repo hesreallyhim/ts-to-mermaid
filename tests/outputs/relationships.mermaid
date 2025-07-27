@@ -68,7 +68,7 @@ classDiagram
 
   class AdminRole {
     <<enumeration>>
-    "super_admin" | "moderator" | "support"
+    "moderator" | "super_admin" | "support"
   }
 
   class BaseEntity {
@@ -117,7 +117,7 @@ classDiagram
 
   class ApplicationStatus {
     <<enumeration>>
-    "active" | "suspended" | "archived"
+    "active" | "archived" | "suspended"
   }
 
   User --|> Entity

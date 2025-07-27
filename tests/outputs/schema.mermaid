@@ -12,7 +12,8 @@ classDiagram
 
   class ProgressToken {
     <<enumeration>>
-    string | number
+    <<type>>
+    number | string
   }
 
   class Cursor {
@@ -37,7 +38,8 @@ classDiagram
 
   class RequestId {
     <<enumeration>>
-    string | number
+    <<type>>
+    number | string
   }
 
   class JSONRPCRequest {
@@ -271,7 +273,8 @@ classDiagram
 
   class Role {
     <<enumeration>>
-    "user" | "assistant"
+    <<type>>
+    "assistant" | "user"
   }
 
   class PromptMessage {
@@ -358,14 +361,14 @@ classDiagram
 
   class LoggingLevel {
     <<enumeration>>
+    "alert"
+    "critical"
     "debug"
+    "emergency"
+    "error"
     "info"
     "notice"
     "warning"
-    "error"
-    "critical"
-    "alert"
-    "emergency"
   }
 
   class CreateMessageRequest {

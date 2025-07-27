@@ -1,0 +1,106 @@
+classDiagram
+  %% Legend
+  %% --|> : Inheritance (extends)
+  %% ..|> : Implementation (implements)
+  %% --* : Composition (has/contains)
+  %% -- : Association
+
+  class UserRole {
+    <<enumeration>>
+    <<type>>
+    "admin" | "guest" | "user"
+  }
+
+  class User {
+    <<interface>>
+    +id: string
+    +name: string
+    +role: UserRole
+  }
+
+  class Post {
+    <<interface>>
+    +id: string
+    +content: string
+    +authorRole: UserRole
+    +visibility: UserRole
+  }
+
+  class Permission {
+    <<interface>>
+    +resource: string
+    +action: string
+    +allowedRoles: UserRoleArray~~
+  }
+
+  class Status {
+    <<enumeration>>
+    <<type>>
+    "active" | "inactive" | "pending" | "suspended"
+  }
+
+  class Account {
+    <<interface>>
+    +id: string
+    +status: Status
+  }
+
+  class Service {
+    <<interface>>
+    +name: string
+    +status: Status
+  }
+
+  class Task {
+    <<interface>>
+    +id: string
+    +status: Status
+    -previousStatus?: Status
+  }
+
+  class SingleUseUnion {
+    <<enumeration>>
+    "option1" | "option2" | "option3"
+  }
+
+  class Config {
+    <<interface>>
+    +mode: SingleUseUnion
+  }
+
+  class Country {
+    <<enumeration>>
+    <<type>>
+    "BR" | "CN" | "DE" | "ES" | "FR" | "IN" | "IT" | "JP" | "UK" | "US"
+  }
+
+  class Address {
+    <<interface>>
+    +street: string
+    +country: Country
+  }
+
+  class User2 {
+    <<interface>>
+    +name: string
+    +nationality: Country
+  }
+
+  class Store {
+    <<interface>>
+    +name: string
+    +locations: CountryArray~~
+  }
+
+  User --* UserRole : role
+  Post --* UserRole : authorRole
+  Post --* UserRole : visibility
+  Permission --* UserRole : allowedRoles
+  Account --* Status : status
+  Service --* Status : status
+  Task --* Status : status
+  Task --* Status : previousStatus
+  Config --* SingleUseUnion : mode
+  Address --* Country : country
+  User2 --* Country : nationality
+  Store --* Country : locations

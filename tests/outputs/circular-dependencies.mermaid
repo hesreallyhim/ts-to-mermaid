@@ -158,7 +158,8 @@ classDiagram
 
   class Expression {
     <<enumeration>>
-    +value: Expression
+    <<type>>
+    BinaryExpression | ConditionalExpression | NumberLiteral | StringLiteral | UnaryExpression
   }
 
   class NumberLiteral {
@@ -243,4 +244,3 @@ classDiagram
   Employee --* Department : department
 
   note for JSONValue "JSONValue = string | number | boolean | null | JSONObject | JSONArray"
-  note for Expression "Expression = NumberLiteral | StringLiteral | BinaryExpression | UnaryExpression | ConditionalExpression"
