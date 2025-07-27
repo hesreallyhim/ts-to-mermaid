@@ -37,9 +37,7 @@ coverage/
 .cache/
 
 # Output files
-tests/outputs/*
-*.mermaid
-!example.mermaid
+# Note: Mermaid outputs are tracked for visibility and snapshot testing
 
 # Logs
 logs/

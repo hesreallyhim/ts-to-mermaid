@@ -1,0 +1,143 @@
+classDiagram
+  %% Legend
+  %% --|> : Inheritance (extends)
+  %% ..|> : Implementation (implements)
+  %% --* : Composition (has/contains)
+  %% -- : Association
+
+  class Entity {
+    <<interface>>
+    +id: number
+    +createdAt: Date
+    +updatedAt: Date
+  }
+
+  class Auditable {
+    <<interface>>
+    +createdBy: string
+    +updatedBy: string
+  }
+
+  class Deletable {
+    <<interface>>
+    +deleted: boolean
+    -deletedAt?: Date
+    -deletedBy?: string
+  }
+
+  class User {
+    <<interface>>
+    +username: string
+    +email: string
+    +profile: UserProfile
+  }
+
+  class Admin {
+    <<interface>>
+    +permissions: PermissionArray~~
+    +role: AdminRole
+  }
+
+  class UserProfile {
+    <<interface>>
+    +firstName: string
+    +lastName: string
+    -avatar?: string
+    +preferences: UserPreferences
+  }
+
+  class UserPreferences {
+    <<interface>>
+    +theme: "light" or "dark"
+    +language: string
+    +notifications: NotificationSettings
+  }
+
+  class NotificationSettings {
+    <<interface>>
+    +email: boolean
+    +push: boolean
+    +sms: boolean
+  }
+
+  class Permission {
+    +resource: string
+    +action: string
+    +granted: boolean
+  }
+
+  class AdminRole {
+    <<enumeration>>
+    "super_admin"
+    "moderator"
+    "support"
+  }
+
+  class BaseEntity {
+    <<class>>
+    +id: number
+    +createdAt: Date
+    +updatedAt: Date
+  }
+
+  class UserService {
+    <<class>>
+    +createdBy: string
+    +updatedBy: string
+    +users: Map~string, User~
+  }
+
+  class CrudService {
+    <<interface>>
+  }
+
+  class BaseService {
+    <<class>>
+    +items: TArray~~
+  }
+
+  class UserEntityService {
+    <<class>>
+  }
+
+  class Application {
+    <<interface>>
+    +id: string
+    +name: string
+    +owner: User
+    +admins: AdminArray~~
+    +settings: ApplicationSettings
+    +status: ApplicationStatus
+  }
+
+  class ApplicationSettings {
+    <<interface>>
+    +public: boolean
+    +maxUsers: number
+    +features: stringArray~~
+  }
+
+  class ApplicationStatus {
+    <<enumeration>>
+    "active"
+    "suspended"
+    "archived"
+  }
+
+  User --|> Entity
+  User --|> Auditable
+  Admin --|> User
+  Admin --|> Deletable
+  BaseEntity ..|> Entity
+  UserService ..|> CrudService
+  UserService ..|> Auditable
+  UserEntityService --|> BaseService
+  User --* UserProfile : profile
+  Admin --* Permission : permissions
+  Admin --* AdminRole : role
+  UserProfile --* UserPreferences : preferences
+  UserPreferences --* NotificationSettings : notifications
+  Application --* User : owner
+  Application --* Admin : admins
+  Application --* ApplicationSettings : settings
+  Application --* ApplicationStatus : status

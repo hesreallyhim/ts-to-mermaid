@@ -1,0 +1,158 @@
+classDiagram
+  %% Legend
+  %% --|> : Inheritance (extends)
+  %% ..|> : Implementation (implements)
+  %% --* : Composition (has/contains)
+  %% -- : Association
+
+  %% Errors encountered during conversion:
+  %% - TS2669: Augmentations for the global scope can only be directly nested in external modules or ambient module declarations.
+
+  class Logger {
+    <<interface>>
+  }
+
+  class ConsoleLogger {
+    <<class>>
+  }
+
+  class LogLevel {
+    <<enumeration>>
+    "info"
+    "warn"
+    "error"
+    "debug"
+  }
+
+  class LogFormat {
+    <<enumeration>>
+    +JSON: "json"
+    +Plain: "plain"
+    +Structured: "structured"
+  }
+
+  class User {
+    <<interface>>
+    +id: string
+    +username: string
+    +email: string
+    +profile: UserProfile
+  }
+
+  class UserProfile {
+    <<interface>>
+    +firstName: string
+    +lastName: string
+    -bio?: string
+    -avatar?: string
+  }
+
+  class UserRole {
+    <<enumeration>>
+    "admin"
+    "user"
+    "guest"
+  }
+
+  class UserService {
+    <<interface>>
+  }
+
+  class UserServiceImpl {
+    <<class>>
+    +users: Map~string, Models.User~
+  }
+
+  class UserController {
+    <<class>>
+    +userService: Services.UserService
+  }
+
+  class Developer {
+    <<interface>>
+    +id: string
+    +name: string
+    +skills: stringArray~~
+    +level: DeveloperLevel
+  }
+
+  class DeveloperLevel {
+    <<enumeration>>
+    +Junior: "JUNIOR"
+    +Mid: "MID"
+    +Senior: "SENIOR"
+    +Lead: "LEAD"
+  }
+
+  class FrontendDeveloper {
+    <<interface>>
+    +frameworks: stringArray~~
+    +designSkills: boolean
+  }
+
+  class BackendDeveloper {
+    <<interface>>
+    +databases: stringArray~~
+    +devOpsSkills: boolean
+  }
+
+  class GlobalConfig {
+    <<interface>>
+    +apiUrl: string
+    +timeout: number
+    +retries: number
+  }
+
+  class PrivateInterface {
+    <<interface>>
+    +secret: string
+  }
+
+  class PublicInterface {
+    <<interface>>
+    +id: string
+  }
+
+  class PublicClass {
+    <<class>>
+    +id: string
+    +hidden: PrivateInterface
+  }
+
+  class ID {
+    <<enumeration>>
+    string
+    number
+  }
+
+  class Timestamp {
+  }
+
+  class Entity {
+    <<interface>>
+    +id: ID
+    +created: Timestamp
+    +updated: Timestamp
+  }
+
+  class Validator {
+    <<interface>>
+  }
+
+  class EntityValidator {
+    <<class>>
+    +errors: stringArray~~
+  }
+
+  ConsoleLogger ..|> Logger
+  UserServiceImpl ..|> UserService
+  FrontendDeveloper --|> Developer
+  BackendDeveloper --|> Developer
+  PublicClass ..|> PublicInterface
+  EntityValidator ..|> Validator
+  User --* UserProfile : profile
+  Developer --* DeveloperLevel : level
+  PublicClass --* PrivateInterface : hidden
+  Entity --* ID : id
+  Entity --* Timestamp : created
+  Entity --* Timestamp : updated

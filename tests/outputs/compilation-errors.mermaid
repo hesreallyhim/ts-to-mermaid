@@ -1,0 +1,136 @@
+classDiagram
+  %% Legend
+  %% --|> : Inheritance (extends)
+  %% ..|> : Implementation (implements)
+  %% --* : Composition (has/contains)
+  %% -- : Association
+
+  %% Errors encountered during conversion:
+  %% - TS2304: Cannot find name 'NonExistentType'.
+  %% - TS2304: Cannot find name 'MissingInterface'.
+  %% - TS1131: Property or signature expected.
+  %% - TS2304: Cannot find name 'NonExistentBase'.
+  %% - TS1131: Property or signature expected.
+  %% ... and 17 more errors
+
+  %% WARNING: The following types had syntax errors and were auto-recovered by the TypeScript parser:
+  %% - BrokenInterface: Missing closing brace or other syntax error was automatically fixed
+  %% - ValidInterface: Missing closing brace or other syntax error was automatically fixed
+  %% - InterfaceWithErrors: Missing closing brace or other syntax error was automatically fixed
+  %% These auto-fixes may not reflect the intended structure!
+
+  class UserAccount {
+    <<interface>>
+    +id: string
+    +profile: NonExistentType
+    +settings: MissingInterface
+  }
+
+  class BrokenInterface {
+    <<interface>>
+    ⚠️ AUTO-FIXED ⚠️
+    +name: string
+    +value: number
+  }
+
+  class ValidInterface {
+    <<interface>>
+    ⚠️ AUTO-FIXED ⚠️
+    +id: number
+    +data: string
+  }
+
+  class MyClass {
+    <<class>>
+    +prop: string
+  }
+
+  class InterfaceWithErrors {
+    <<interface>>
+    ⚠️ AUTO-FIXED ⚠️
+    +validProp: string
+  }
+
+  class Circular {
+    +self: Circular
+    +value: string
+  }
+
+  class DuplicateEnum {
+    <<enumeration>>
+    +A: 1
+    +B: 1
+    +C: 2
+  }
+
+  class ExtendsMissing {
+    <<interface>>
+    +ownProp: string
+  }
+
+  class ImplementsMissing {
+    <<class>>
+    +someProp: string
+  }
+
+  class GenericBroken {
+    <<interface>>
+    +value: T
+  }
+
+  class MethodErrors {
+    <<interface>>
+  }
+
+  class BrokenAlias {
+    <<enumeration>>
+    UndefinedTypeA
+    UndefinedTypeB
+    string
+  }
+
+  class InternalInterface {
+    <<interface>>
+    +prop: string
+  }
+
+  class ComputedProp {
+    <<interface>>
+    +[key]: string
+    +normalProp: number
+  }
+
+  class DecoratedClass {
+    <<class>>
+    +prop: string
+  }
+
+  class MissingComma {
+    <<interface>>
+    +prop1: string
+    +prop2: number
+    +prop3: boolean
+  }
+
+  class ValidUser {
+    <<interface>>
+    +id: string
+    +name: string
+    +email: string
+  }
+
+  class ValidProduct {
+    <<interface>>
+    +id: number
+    +name: string
+    +price: number
+    +owner: ValidUser
+  }
+
+  class ValidService {
+    <<class>>
+    +users: ValidUserArray~~
+  }
+
+  ValidProduct --* ValidUser : owner
+  ValidService --* ValidUser : users

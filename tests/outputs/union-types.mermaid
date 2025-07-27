@@ -1,0 +1,132 @@
+classDiagram
+  %% Legend
+  %% --|> : Inheritance (extends)
+  %% ..|> : Implementation (implements)
+  %% --* : Composition (has/contains)
+  %% -- : Association
+
+  class ColorName {
+    <<enumeration>>
+    "red"
+    "green"
+    "blue"
+    "yellow"
+  }
+
+  class Priority {
+    <<enumeration>>
+    1
+    2
+    3
+    4
+    5
+  }
+
+  class Status {
+    <<enumeration>>
+    "active"
+    "inactive"
+    "pending"
+    404
+    503
+  }
+
+  class Toggle {
+    <<enumeration>>
+    true
+    false
+  }
+
+  class PrimaryColor {
+    <<enumeration>>
+    "red"
+    "green"
+    "blue"
+  }
+
+  class SecondaryColor {
+    <<enumeration>>
+    "orange"
+    "purple"
+    "green"
+  }
+
+  class AllColors {
+    <<enumeration>>
+    PrimaryColor
+    SecondaryColor
+  }
+
+  class OptionalStatus {
+    <<enumeration>>
+    "success"
+    "error"
+    "loading"
+    undefined
+  }
+
+  class NullableResult {
+    <<enumeration>>
+    string
+    number
+    null
+  }
+
+  class ApiResponse {
+    <<enumeration>>
+    Object
+    Object
+    Object
+  }
+
+  class Task {
+    <<interface>>
+    +id: string
+    +title: string
+    +priority: Priority
+    +status: Status
+    -color?: ColorName
+  }
+
+  class StateManager {
+    <<class>>
+    +currentState: Status
+    +previousStates: StatusArray~~
+  }
+
+  class NestedStatus {
+    <<enumeration>>
+    Object
+    Object
+  }
+
+  class HttpMethod {
+    <<enumeration>>
+    "GET"
+    "POST"
+    "PUT"
+    "DELETE"
+    "PATCH"
+  }
+
+  class ApiEndpoint {
+    <<enumeration>>
+    "/users"
+    "/posts"
+    "/comments"
+  }
+
+  class RequestConfig {
+    +method: HttpMethod
+    +endpoint: ApiEndpoint
+    -status?: OptionalStatus
+  }
+
+  Task --* Priority : priority
+  Task --* Status : status
+  Task --* ColorName : color
+  StateManager --* Status : currentState
+  StateManager --* Status : previousStates
+  RequestConfig --* HttpMethod : method
+  RequestConfig --* ApiEndpoint : endpoint
+  RequestConfig --* OptionalStatus : status

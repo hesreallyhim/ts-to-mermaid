@@ -1,0 +1,60 @@
+classDiagram
+  %% Legend
+  %% --|> : Inheritance (extends)
+  %% ..|> : Implementation (implements)
+  %% --* : Composition (has/contains)
+  %% -- : Association
+
+  class Animal {
+    <<interface>>
+    +id: string
+    +name: string
+    +species: string
+    -age?: number
+    +dateOfBirth: Date
+  }
+
+  class Pet {
+    <<interface>>
+    +owner: string
+    +vaccinated: boolean
+    +tags: stringArray~~
+  }
+
+  class WildAnimal {
+    <<interface>>
+    +habitat: string
+    +endangered: boolean
+    -population?: number
+  }
+
+  class AnimalType {
+    <<enumeration>>
+    +Mammal: "MAMMAL"
+    +Bird: "BIRD"
+    +Reptile: "REPTILE"
+    +Fish: "FISH"
+    +Amphibian: "AMPHIBIAN"
+  }
+
+  class AnimalShelter {
+    <<class>>
+    +animals: AnimalArray~~
+    +capacity: number
+  }
+
+  class PetClinic {
+    <<class>>
+    +patients: PetArray~~
+    +vetName: string
+  }
+
+  class ClinicService {
+    <<interface>>
+  }
+
+  Pet --|> Animal
+  WildAnimal --|> Animal
+  PetClinic ..|> ClinicService
+  AnimalShelter --* Animal : animals
+  PetClinic --* Pet : patients

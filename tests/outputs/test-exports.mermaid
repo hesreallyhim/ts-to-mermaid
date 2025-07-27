@@ -1,0 +1,39 @@
+classDiagram
+  %% Legend
+  %% --|> : Inheritance (extends)
+  %% ..|> : Implementation (implements)
+  %% --* : Composition (has/contains)
+  %% -- : Association
+
+  class User {
+    <<interface>>
+    +id: number
+    +name: string
+    +email: string
+  }
+
+  class UserRole {
+    <<enumeration>>
+    'admin'
+    'user'
+    'guest'
+  }
+
+  class Status {
+    <<enumeration>>
+    +Active: 'ACTIVE'
+    +Inactive: 'INACTIVE'
+    +Pending: 'PENDING'
+  }
+
+  class UserService {
+    <<class>>
+    +users: UserArray~~
+  }
+
+  class DefaultExport {
+    <<class>>
+    +value: string
+  }
+
+  UserService --* User : users

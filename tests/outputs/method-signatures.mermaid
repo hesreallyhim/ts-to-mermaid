@@ -1,0 +1,53 @@
+classDiagram
+  %% Legend
+  %% --|> : Inheritance (extends)
+  %% ..|> : Implementation (implements)
+  %% --* : Composition (has/contains)
+  %% -- : Association
+
+  class Calculator {
+    <<interface>>
+  }
+
+  class DataProcessor {
+    <<interface>>
+  }
+
+  class BasicCalculator {
+    <<class>>
+    +memory: number
+  }
+
+  class MathOperations {
+    +add: Function
+    +subtract: Function
+    +convert: Object
+  }
+
+  class Converter {
+    <<interface>>
+  }
+
+  class BaseService {
+    <<class>>
+    +serviceName: string
+  }
+
+  class Callable {
+    <<interface>>
+    +id: string
+    +timestamp: Date
+  }
+
+  class Component {
+    <<interface>>
+    +id: string
+    +name: string
+  }
+
+  class Collection {
+    <<class>>
+    +items: TArray~~
+  }
+
+  BasicCalculator ..|> Calculator

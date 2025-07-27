@@ -1,0 +1,124 @@
+classDiagram
+  %% Legend
+  %% --|> : Inheritance (extends)
+  %% ..|> : Implementation (implements)
+  %% --* : Composition (has/contains)
+  %% -- : Association
+
+  %% Errors encountered during conversion:
+  %% - TS2300: Duplicate identifier 'Document'.
+
+  class Named {
+    <<interface>>
+    +name: string
+  }
+
+  class Aged {
+    <<interface>>
+    +age: number
+  }
+
+  class NamedAndAged {
+  }
+
+  class Person {
+    <<interface>>
+    +email: string
+  }
+
+  class WithId {
+    +id: string
+    +createdAt: Date
+  }
+
+  class IdentifiablePerson {
+  }
+
+  class Timestamped {
+    <<interface>>
+    +createdAt: Date
+    +updatedAt: Date
+  }
+
+  class Versioned {
+    <<interface>>
+    +version: number
+    +previousVersions: numberArray~~
+  }
+
+  class Authored {
+    <<interface>>
+    +author: string
+    +contributors: stringArray~~
+  }
+
+  class Document {
+  }
+
+  class ReadPermissions {
+    +canRead: boolean
+    +readGroups: stringArray~~
+  }
+
+  class WritePermissions {
+    +canWrite: boolean
+    +writeGroups: stringArray~~
+  }
+
+  class AdminPermissions {
+    +canDelete: boolean
+    +canManageUsers: boolean
+  }
+
+  class FullPermissions {
+  }
+
+  class User {
+    <<class>>
+    +name: string
+    +age: number
+  }
+
+  class Identifiable {
+    <<interface>>
+    +id: T
+  }
+
+  class Trackable {
+    <<interface>>
+    +trackingId: string
+    +lastModified: Date
+  }
+
+  class TrackedEntity {
+  }
+
+  class Saveable {
+    <<interface>>
+  }
+
+  class Loadable {
+    <<interface>>
+  }
+
+  class Persistable {
+  }
+
+  class A {
+    <<interface>>
+    +prop: string
+    +shared: number
+  }
+
+  class B {
+    <<interface>>
+    +prop: number
+    +shared: number
+  }
+
+  class Intersection {
+  }
+
+  Person --|> Named
+  Person --|> Aged
+  User ..|> NamedAndAged

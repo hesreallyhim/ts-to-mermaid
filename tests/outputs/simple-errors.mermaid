@@ -1,0 +1,106 @@
+classDiagram
+  %% Legend
+  %% --|> : Inheritance (extends)
+  %% ..|> : Implementation (implements)
+  %% --* : Composition (has/contains)
+  %% -- : Association
+
+  %% Errors encountered during conversion:
+  %% - TS1131: Property or signature expected.
+
+  %% WARNING: The following types had syntax errors and were auto-recovered by the TypeScript parser:
+  %% - Product: Missing closing brace or other syntax error was automatically fixed
+  %% - Order: Missing closing brace or other syntax error was automatically fixed
+  %% These auto-fixes may not reflect the intended structure!
+
+  class User {
+    <<interface>>
+    +id: string
+    +name: string
+    +email: string
+    +role: UserRole
+  }
+
+  class UserRole {
+    <<enumeration>>
+    +Admin: "ADMIN"
+    +User: "USER"
+    +Guest: "GUEST"
+  }
+
+  class Product {
+    <<interface>>
+    ⚠️ AUTO-FIXED ⚠️
+    +id: number
+    +name: string
+    +price: number
+    +owner: User
+  }
+
+  class Order {
+    <<interface>>
+    ⚠️ AUTO-FIXED ⚠️
+    +id: string
+    +user: User
+    +products: ProductArray~~
+    +total: number
+    +status: OrderStatus
+  }
+
+  class OrderStatus {
+    <<enumeration>>
+    "pending"
+    "shipped"
+    "delivered"
+    "cancelled"
+  }
+
+  class OrderService {
+    <<class>>
+    +orders: OrderArray~~
+    +serviceName: string
+  }
+
+  class SpecialProduct {
+    <<interface>>
+    +discount: number
+    +featured: boolean
+  }
+
+  class UserManager {
+    <<class>>
+    +users: Map~string, User~
+  }
+
+  class Dashboard {
+    <<interface>>
+    +title: string
+    +widgets: WidgetArray~~
+    +user: User
+    +lastUpdated: Date
+  }
+
+  class Widget {
+    <<interface>>
+    +id: string
+    +type: "chart" or "table" or "metric"
+    +data: any
+  }
+
+  class Application {
+    <<class>>
+    +userManager: UserManager
+    +orderService: OrderService
+  }
+
+  SpecialProduct --|> Product
+  User --* UserRole : role
+  Product --* User : owner
+  Order --* User : user
+  Order --* Product : products
+  Order --* OrderStatus : status
+  OrderService --* Order : orders
+  Dashboard --* Widget : widgets
+  Dashboard --* User : user
+  Application --* UserManager : userManager
+  Application --* OrderService : orderService

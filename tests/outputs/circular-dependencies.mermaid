@@ -1,0 +1,252 @@
+classDiagram
+  %% Legend
+  %% --|> : Inheritance (extends)
+  %% ..|> : Implementation (implements)
+  %% --* : Composition (has/contains)
+  %% -- : Association
+
+  %% Errors encountered during conversion:
+  %% - TS2687: All declarations of 'name' must have identical modifiers.
+
+  class TreeNode {
+    <<interface>>
+    +id: string
+    +value: any
+    +children: TreeNodeArray~~
+    -parent?: TreeNode
+  }
+
+  class Author {
+    <<interface>>
+    +id: string
+    +name: string
+    +books: BookArray~~
+  }
+
+  class Book {
+    <<interface>>
+    +id: string
+    +title: string
+    +author: Author
+    -relatedBooks?: BookArray~~
+  }
+
+  class User {
+    <<interface>>
+    +id: string
+    +username: string
+    +posts: PostArray~~
+    +comments: CommentArray~~
+  }
+
+  class Post {
+    <<interface>>
+    +id: string
+    +content: string
+    +author: User
+    +comments: CommentArray~~
+    -parentPost?: Post
+  }
+
+  class Comment {
+    <<interface>>
+    +id: string
+    +text: string
+    +author: User
+    +post: Post
+    +replies: CommentArray~~
+  }
+
+  class LinkedListNode {
+    +value: T
+    -next?: LinkedListNode~T~
+    -prev?: LinkedListNode~T~
+  }
+
+  class GraphNode {
+    <<interface>>
+    +id: string
+    +data: any
+    +edges: EdgeArray~~
+  }
+
+  class Edge {
+    <<interface>>
+    +id: string
+    +from: GraphNode
+    +to: GraphNode
+    -weight?: number
+  }
+
+  class BaseEntity {
+    <<interface>>
+    +id: string
+    +created: Date
+    -relatedEntities?: EntityArray~~
+  }
+
+  class Entity {
+    <<interface>>
+    +name: string
+    -parent?: Entity
+    +children: EntityArray~~
+  }
+
+  class State {
+    <<interface>>
+    +name: string
+    +transitions: TransitionArray~~
+    -onEnter?: Function
+    -onExit?: Function
+  }
+
+  class Transition {
+    <<interface>>
+    +event: string
+    +from: State
+    +to: State
+    -condition?: Function
+  }
+
+  class JSONValue {
+    <<enumeration>>
+    string
+    number
+    boolean
+    null
+    JSONObject
+    JSONArray
+  }
+
+  class JSONObject {
+    <<interface>>
+  }
+
+  class JSONArray {
+    <<interface>>
+  }
+
+  class File {
+    <<interface>>
+    +name: string
+    +size: number
+    +parent: Directory
+  }
+
+  class Directory {
+    <<interface>>
+    +name: string
+    +files: FileArray~~
+    +subdirectories: DirectoryArray~~
+    -parent?: Directory
+  }
+
+  class Person {
+    <<interface>>
+    +id: string
+    +name: string
+    +friends: PersonArray~~
+    +following: PersonArray~~
+    +followers: PersonArray~~
+    +groups: GroupArray~~
+  }
+
+  class Group {
+    <<interface>>
+    +id: string
+    +name: string
+    +members: PersonArray~~
+    +admins: PersonArray~~
+    -parentGroup?: Group
+    +subgroups: GroupArray~~
+  }
+
+  class Expression {
+    <<enumeration>>
+    NumberLiteral
+    StringLiteral
+    BinaryExpression
+    UnaryExpression
+    ConditionalExpression
+  }
+
+  class NumberLiteral {
+    <<interface>>
+    +type: "number"
+    +value: number
+  }
+
+  class StringLiteral {
+    <<interface>>
+    +type: "string"
+    +value: string
+  }
+
+  class BinaryExpression {
+    <<interface>>
+    +type: "binary"
+    +operator: "+" or "-" or "*" or "/" or "andand" or "oror"
+    +left: Expression
+    +right: Expression
+  }
+
+  class UnaryExpression {
+    <<interface>>
+    +type: "unary"
+    +operator: "!" or "-" or "+"
+    +operand: Expression
+  }
+
+  class ConditionalExpression {
+    <<interface>>
+    +type: "conditional"
+    +condition: Expression
+    +consequent: Expression
+    +alternate: Expression
+  }
+
+  class Department {
+    <<class>>
+    +name: string
+    +manager: Employee
+    +employees: EmployeeArray~~
+  }
+
+  class Employee {
+    <<class>>
+    +name: string
+    +department: Department
+    -manager?: Employee
+    +subordinates: EmployeeArray~~
+  }
+
+  Entity --|> BaseEntity
+  Author --* Book : books
+  Book --* Author : author
+  User --* Post : posts
+  User --* Comment : comments
+  Post --* User : author
+  Post --* Comment : comments
+  Comment --* User : author
+  Comment --* Post : post
+  GraphNode --* Edge : edges
+  Edge --* GraphNode : from
+  Edge --* GraphNode : to
+  BaseEntity --* Entity : relatedEntities
+  State --* Transition : transitions
+  Transition --* State : from
+  Transition --* State : to
+  File --* Directory : parent
+  Directory --* File : files
+  Person --* Group : groups
+  Group --* Person : members
+  Group --* Person : admins
+  BinaryExpression --* Expression : left
+  BinaryExpression --* Expression : right
+  UnaryExpression --* Expression : operand
+  ConditionalExpression --* Expression : condition
+  ConditionalExpression --* Expression : consequent
+  ConditionalExpression --* Expression : alternate
+  Department --* Employee : manager
+  Department --* Employee : employees
+  Employee --* Department : department

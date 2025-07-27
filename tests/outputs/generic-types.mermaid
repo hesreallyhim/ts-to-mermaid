@@ -1,0 +1,81 @@
+classDiagram
+  %% Legend
+  %% --|> : Inheritance (extends)
+  %% ..|> : Implementation (implements)
+  %% --* : Composition (has/contains)
+  %% -- : Association
+
+  class Container {
+    <<interface>>
+    +value: T
+  }
+
+  class Pair {
+    <<interface>>
+    +key: K
+    +value: V
+  }
+
+  class NumberContainer {
+    <<interface>>
+    +value: T
+  }
+
+  class Result {
+    <<enumeration>>
+    Object
+    Object
+  }
+
+  class Optional {
+    <<enumeration>>
+    T
+    undefined
+  }
+
+  class Stack {
+    <<class>>
+    +items: TArray~~
+  }
+
+  class NumericStack {
+    <<class>>
+  }
+
+  class DataStore {
+    <<interface>>
+    +users: Container~User~
+    +settings: Pair~string, any~Array~~
+    +cache: Stack~string~
+  }
+
+  class User {
+    <<interface>>
+    +id: number
+    +name: string
+    +email: string
+  }
+
+  class Mapper {
+  }
+
+  class NestedContainer {
+    +value: Container~Container~T~~
+  }
+
+  class Matrix {
+  }
+
+  class StringOrNumberContainer {
+    <<interface>>
+    +value: T
+  }
+
+  class UserRepository {
+    <<class>>
+    +user: User
+  }
+
+  NumericStack --|> Stack
+  UserRepository ..|> Container
+  UserRepository --* User : user

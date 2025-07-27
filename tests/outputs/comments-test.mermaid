@@ -1,0 +1,44 @@
+classDiagram
+  %% Legend
+  %% --|> : Inheritance (extends)
+  %% ..|> : Implementation (implements)
+  %% --* : Composition (has/contains)
+  %% -- : Association
+
+  class User {
+    <<interface>>
+    +id: number
+    +name: string
+    +email: string
+    -role?: UserRole
+  }
+
+  class UserRole {
+    <<enumeration>>
+    'admin'
+    'moderator'
+    'user'
+  }
+
+  class AccountStatus {
+    <<enumeration>>
+    +Active: 1
+    +Suspended: 2
+    +Deleted: 3
+  }
+
+  class UserServiceTwo {
+    <<class>>
+    +users: UserArray~~
+    +activeCount: number
+  }
+
+  class AdminUser {
+    <<interface>>
+    +permissions: stringArray~~
+    +promotedAt: Date
+  }
+
+  AdminUser --|> User
+  User --* UserRole : role
+  UserServiceTwo --* User : users

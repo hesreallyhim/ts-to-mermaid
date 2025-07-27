@@ -1,0 +1,206 @@
+classDiagram
+  %% Legend
+  %% --|> : Inheritance (extends)
+  %% ..|> : Implementation (implements)
+  %% --* : Composition (has/contains)
+  %% -- : Association
+
+  %% Errors encountered during conversion:
+  %% - TS6200: Definitions of the following identifiers conflict with those in another file: Readonly, Partial, Extract, Exclude, ReturnType, Parameters, Pick, Omit, Record, Awaited
+
+  class Readonly {
+  }
+
+  class Partial {
+  }
+
+  class Nullable {
+  }
+
+  class User {
+    <<interface>>
+    +id: string
+    +name: string
+    +email: string
+    +age: number
+  }
+
+  class ReadonlyUser {
+    +value: Readonly~User~
+  }
+
+  class PartialUser {
+    +value: Partial~User~
+  }
+
+  class NullableUser {
+    +value: Nullable~User~
+  }
+
+  class Getters {
+  }
+
+  class UserGetters {
+    +value: Getters~User~
+  }
+
+  class IsString {
+  }
+
+  class IsNumber {
+  }
+
+  class Extract {
+  }
+
+  class Exclude {
+  }
+
+  class StringsOnly {
+    +value: Extract~string or number or boolean, string~
+  }
+
+  class NotString {
+    +value: Exclude~string or number or boolean, string~
+  }
+
+  class ReturnType {
+  }
+
+  class Parameters {
+  }
+
+  class ExampleFunc {
+  }
+
+  class FuncReturn {
+    +value: ReturnType~ExampleFunc~
+  }
+
+  class FuncParams {
+    +value: Parameters~ExampleFunc~
+  }
+
+  class EventName {
+    <<enumeration>>
+    "click"
+    "focus"
+    "blur"
+  }
+
+  class EventHandlerName {
+  }
+
+  class Handler {
+    +value: EventHandlerName~EventName~
+  }
+
+  class DeepPartial {
+  }
+
+  class NestedUser {
+    <<interface>>
+    +id: string
+    +profile: Object
+  }
+
+  class DeepPartialUser {
+    +value: DeepPartial~NestedUser~
+  }
+
+  class Action {
+    <<enumeration>>
+    Object
+    Object
+    Object
+  }
+
+  class ActionType {
+  }
+
+  class ExtractAction {
+    +value: Extract~Action, Object~
+  }
+
+  class AddAction {
+    +value: ExtractAction~"ADD"~
+  }
+
+  class RemoveAction {
+    +value: ExtractAction~"REMOVE"~
+  }
+
+  class Pick {
+  }
+
+  class Omit {
+  }
+
+  class UserBasicInfo {
+    +value: Pick~User, "id" or "name"~
+  }
+
+  class UserWithoutAge {
+    +value: Omit~User, "age"~
+  }
+
+  class Record {
+  }
+
+  class UserRecord {
+    +value: Record~string, User~
+  }
+
+  class StatusRecord {
+    +value: Record~"active" or "inactive" or "pending", boolean~
+  }
+
+  class Awaited {
+  }
+
+  class PromiseString {
+    +value: Promise~string~
+  }
+
+  class UnwrappedString {
+    +value: Awaited~PromiseString~
+  }
+
+  class Flatten {
+  }
+
+  class NestedArray {
+  }
+
+  class FlatType {
+    +value: Flatten~NestedArray~
+  }
+
+  class OnlyStringProperties {
+  }
+
+  class MixedTypes {
+    <<interface>>
+    +id: number
+    +name: string
+    +active: boolean
+    +description: string
+  }
+
+  class StringProperties {
+    +value: OnlyStringProperties~MixedTypes~
+  }
+
+  class UnionToIntersection {
+  }
+
+  class Union {
+    <<enumeration>>
+    Object
+    Object
+    Object
+  }
+
+  class Intersection {
+    +value: UnionToIntersection~Union~
+  }
