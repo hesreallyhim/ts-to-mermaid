@@ -2,16 +2,39 @@
   "name": "ts-to-mermaid",
   "version": "1.0.0",
   "description": "Convert TypeScript interfaces and types to Mermaid class diagrams",
-  "main": "ts-to-mermaid.ts",
+  "main": "dist/ts-to-mermaid.js",
+  "types": "dist/ts-to-mermaid.d.ts",
+  "bin": {
+    "ts-to-mermaid": "./dist/ts-to-mermaid.js"
+  },
+  "files": [
+    "dist/",
+    "README.md",
+    "LICENSE"
+  ],
   "author": {
     "name": "Really Him",
     "email": "hesreallyhim@proton.me"
   },
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/ts-to-mermaid.git"
+  },
+  "keywords": [
+    "typescript",
+    "mermaid",
+    "diagram",
+    "class-diagram",
+    "uml",
+    "visualization",
+    "converter"
+  ],
   "type": "commonjs",
   "scripts": {
     "convert": "ts-node ts-to-mermaid.ts",
     "build": "tsc",
+    "prepare": "npm run build",
     "test": "for file in tests/*.ts; do echo \"Converting $file...\"; ts-node ts-to-mermaid.ts \"$file\" --save tests/outputs; done"
   },
   "dependencies": {
