@@ -49,10 +49,7 @@ classDiagram
 
   class OrderStatus {
     <<enumeration>>
-    "pending"
-    "shipped"
-    "delivered"
-    "cancelled"
+    "pending" | "shipped" | "delivered" | "cancelled"
   }
 
   class OrderService {

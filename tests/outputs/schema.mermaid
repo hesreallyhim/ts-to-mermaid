@@ -15,8 +15,7 @@ classDiagram
 
   class ProgressToken {
     <<enumeration>>
-    string
-    number
+    string | number
   }
 
   class Cursor {
@@ -41,8 +40,7 @@ classDiagram
 
   class RequestId {
     <<enumeration>>
-    string
-    number
+    string | number
   }
 
   class JSONRPCRequest {
@@ -276,8 +274,7 @@ classDiagram
 
   class Role {
     <<enumeration>>
-    "user"
-    "assistant"
+    "user" | "assistant"
   }
 
   class PromptMessage {

@@ -3,6 +3,14 @@ import ts from 'typescript';
 import * as fs from 'fs';
 import * as path from 'path';
 
+interface UnionMetadata {
+  kind: 'simple' | 'large' | 'discriminated' | 'complex' | 'primitive';
+  values?: string[];
+  discriminator?: string;
+  isReusable?: boolean;
+  rawType?: string;
+}
+
 interface TypeInfo {
   name: string;
   kind: 'interface' | 'type' | 'enum' | 'class';
@@ -12,6 +20,7 @@ interface TypeInfo {
   typeParameters?: string[];
   isUnion?: boolean;
   unionTypes?: string[];
+  unionMetadata?: UnionMetadata;
 }
 
 interface Property {
@@ -154,7 +163,7 @@ class TypeScriptToMermaid {
     node.members.forEach((member) => {
       if (ts.isPropertySignature(member) && member.name) {
         const propName = member.name.getText(this.sourceFile);
-        const propType = member.type ? this.getTypeString(member.type) : 'any';
+        const propType = member.type ? this.getTypeStringForProperty(member.type) : 'any';
 
         typeInfo.properties.push({
           name: propName,
@@ -186,6 +195,9 @@ class TypeScriptToMermaid {
     if (ts.isUnionTypeNode(node.type)) {
       typeInfo.isUnion = true;
       typeInfo.unionTypes = node.type.types.map(t => this.getTypeString(t));
+      
+      // Classify the union type
+      typeInfo.unionMetadata = this.classifyUnion(node.type);
 
       // Skip creating union relationships since we're rendering as enumeration
       // This keeps the diagram cleaner
@@ -195,7 +207,7 @@ class TypeScriptToMermaid {
       node.type.members.forEach((member) => {
         if (ts.isPropertySignature(member) && member.name) {
           const propName = member.name.getText(this.sourceFile);
-          const propType = member.type ? this.getTypeString(member.type) : 'any';
+          const propType = member.type ? this.getTypeStringForProperty(member.type) : 'any';
 
           typeInfo.properties.push({
             name: propName,
@@ -296,7 +308,7 @@ class TypeScriptToMermaid {
     node.members.forEach((member) => {
       if (ts.isPropertyDeclaration(member) && member.name) {
         const propName = member.name.getText(this.sourceFile);
-        const propType = member.type ? this.getTypeString(member.type) : 'any';
+        const propType = member.type ? this.getTypeStringForProperty(member.type) : 'any';
 
         typeInfo.properties.push({
           name: propName,
@@ -336,6 +348,24 @@ class TypeScriptToMermaid {
     }
 
     return typeNode.getText(this.sourceFile);
+  }
+
+  private getTypeStringForProperty(typeNode: ts.TypeNode): string {
+    // Special handling for unions in properties - apply inline annotation rules
+    if (ts.isUnionTypeNode(typeNode)) {
+      const metadata = this.classifyUnion(typeNode);
+      
+      if (metadata.kind === 'simple' || metadata.kind === 'primitive') {
+        // Inline simple unions directly in property type
+        return typeNode.types.map(t => this.getTypeString(t)).join(' | ');
+      } else {
+        // For complex unions, just use the type name if it's a reference
+        // Otherwise fall back to regular string representation
+        return this.getTypeString(typeNode);
+      }
+    }
+    
+    return this.getTypeString(typeNode);
   }
 
   private detectCompositionRelationships(): void {
@@ -394,6 +424,149 @@ class TypeScriptToMermaid {
     ]);
 
     return !builtInTypes.has(type) && !type.match(/^['"].*['"]$/);
+  }
+
+  private classifyUnion(unionNode: ts.UnionTypeNode): UnionMetadata {
+    const unionTypes = unionNode.types;
+    const typeStrings = unionTypes.map(t => this.getTypeString(t));
+    
+    // Check for template literals or intersections -> complex
+    const hasTemplateLiteral = unionTypes.some(t => ts.isTemplateLiteralTypeNode(t));
+    const hasIntersection = unionTypes.some(t => ts.isIntersectionTypeNode(t));
+    if (hasTemplateLiteral || hasIntersection) {
+      return {
+        kind: 'complex',
+        rawType: this.getTypeString(unionNode)
+      };
+    }
+
+    // Check for mixed literals and non-literals -> complex
+    const literals = unionTypes.filter(t => 
+      ts.isLiteralTypeNode(t) || 
+      (ts.isTypeReferenceNode(t) && ['true', 'false', 'null', 'undefined'].includes(t.typeName.getText(this.sourceFile)))
+    );
+    const nonLiterals = unionTypes.filter(t => 
+      !ts.isLiteralTypeNode(t) && 
+      !(ts.isTypeReferenceNode(t) && ['true', 'false', 'null', 'undefined'].includes(t.typeName.getText(this.sourceFile)))
+    );
+    
+    if (literals.length > 0 && nonLiterals.length > 0) {
+      // Check if it's just primitives (string | number | boolean)
+      const allPrimitives = typeStrings.every(t => 
+        ['string', 'number', 'boolean', 'null', 'undefined'].includes(t) ||
+        t.match(/^['"].*['"]$/) || t.match(/^\d+$/)
+      );
+      
+      if (!allPrimitives) {
+        return {
+          kind: 'complex',
+          rawType: this.getTypeString(unionNode)
+        };
+      }
+    }
+
+    // Check for discriminated unions (all members are object types with common property)
+    const objectTypes = unionTypes.filter(t => ts.isTypeLiteralNode(t));
+    if (objectTypes.length === unionTypes.length && objectTypes.length > 1) {
+      // Find common properties
+      const commonProps = this.findCommonDiscriminatorProperty(objectTypes as ts.TypeLiteralNode[]);
+      if (commonProps) {
+        return {
+          kind: 'discriminated',
+          discriminator: commonProps,
+          values: typeStrings
+        };
+      }
+    }
+
+    // Count literal values
+    const literalCount = literals.length;
+    
+    // Simple literals (≤ 5 values)
+    if (literalCount <= 5 && literalCount === unionTypes.length) {
+      return {
+        kind: 'simple',
+        values: typeStrings
+      };
+    }
+    
+    // Large literals (> 5 values)
+    if (literalCount > 5 && literalCount === unionTypes.length) {
+      return {
+        kind: 'large',
+        values: typeStrings
+      };
+    }
+
+    // Primitive unions (string | number, etc.)
+    const allPrimitiveTypes = typeStrings.every(t => 
+      ['string', 'number', 'boolean', 'null', 'undefined', 'symbol', 'bigint'].includes(t)
+    );
+    if (allPrimitiveTypes) {
+      return {
+        kind: 'primitive',
+        values: typeStrings
+      };
+    }
+
+    // Default to complex for everything else
+    return {
+      kind: 'complex',
+      rawType: this.getTypeString(unionNode)
+    };
+  }
+
+  private findCommonDiscriminatorProperty(objectTypes: ts.TypeLiteralNode[]): string | null {
+    if (objectTypes.length === 0) return null;
+    
+    // Get properties from first object
+    const firstObjectProps = new Map<string, ts.TypeNode>();
+    objectTypes[0].members.forEach(member => {
+      if (ts.isPropertySignature(member) && member.name && ts.isIdentifier(member.name) && member.type) {
+        firstObjectProps.set(member.name.text, member.type);
+      }
+    });
+
+    // Find properties that exist in all objects with literal values
+    for (const [propName] of firstObjectProps) {
+      let isDiscriminator = true;
+      const discriminatorValues = new Set<string>();
+
+      // Check if this property exists in all objects with a literal type
+      for (const objType of objectTypes) {
+        let foundProp = false;
+        
+        objType.members.forEach(member => {
+          if (ts.isPropertySignature(member) && 
+              member.name && 
+              ts.isIdentifier(member.name) && 
+              member.name.text === propName &&
+              member.type) {
+            foundProp = true;
+            
+            // Check if it's a literal type
+            if (ts.isLiteralTypeNode(member.type)) {
+              const value = member.type.literal.getText(this.sourceFile);
+              discriminatorValues.add(value);
+            } else {
+              isDiscriminator = false;
+            }
+          }
+        });
+
+        if (!foundProp) {
+          isDiscriminator = false;
+          break;
+        }
+      }
+
+      // Valid discriminator if all objects have this property with unique literal values
+      if (isDiscriminator && discriminatorValues.size === objectTypes.length) {
+        return propName;
+      }
+    }
+
+    return null;
   }
 
   generateMermaid(): string {
@@ -456,8 +629,35 @@ class TypeScriptToMermaid {
       }
 
       // Add properties or union members
-      if (typeInfo.isUnion && typeInfo.unionTypes) {
-        // For unions, display members as enum values
+      if (typeInfo.isUnion && typeInfo.unionTypes && typeInfo.unionMetadata) {
+        // Handle different union types based on classification
+        switch (typeInfo.unionMetadata.kind) {
+          case 'simple':
+          case 'primitive': {
+            // For simple/primitive unions, show inline in type definition
+            const inlineUnion = typeInfo.unionTypes.join(' | ');
+            lines.push(`    ${inlineUnion}`);
+            break;
+          }
+            
+          case 'large':
+          case 'discriminated':
+            // For large unions and discriminated unions (for now), use enumeration
+            for (const unionType of typeInfo.unionTypes) {
+              lines.push(`    ${unionType}`);
+            }
+            break;
+            
+          case 'complex':
+            // For complex unions, we'll add note support in Phase 2
+            // For now, fall back to enumeration
+            for (const unionType of typeInfo.unionTypes) {
+              lines.push(`    ${unionType}`);
+            }
+            break;
+        }
+      } else if (typeInfo.isUnion && typeInfo.unionTypes) {
+        // Fallback for unions without metadata (shouldn't happen)
         for (const unionType of typeInfo.unionTypes) {
           lines.push(`    ${unionType}`);
         }

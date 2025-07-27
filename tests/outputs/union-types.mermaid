@@ -7,48 +7,32 @@ classDiagram
 
   class ColorName {
     <<enumeration>>
-    "red"
-    "green"
-    "blue"
-    "yellow"
+    "red" | "green" | "blue" | "yellow"
   }
 
   class Priority {
     <<enumeration>>
-    1
-    2
-    3
-    4
-    5
+    1 | 2 | 3 | 4 | 5
   }
 
   class Status {
     <<enumeration>>
-    "active"
-    "inactive"
-    "pending"
-    404
-    503
+    "active" | "inactive" | "pending" | 404 | 503
   }
 
   class Toggle {
     <<enumeration>>
-    true
-    false
+    true | false
   }
 
   class PrimaryColor {
     <<enumeration>>
-    "red"
-    "green"
-    "blue"
+    "red" | "green" | "blue"
   }
 
   class SecondaryColor {
     <<enumeration>>
-    "orange"
-    "purple"
-    "green"
+    "orange" | "purple" | "green"
   }
 
   class AllColors {
@@ -67,9 +51,7 @@ classDiagram
 
   class NullableResult {
     <<enumeration>>
-    string
-    number
-    null
+    string | number | null
   }
 
   class ApiResponse {
@@ -102,18 +84,12 @@ classDiagram
 
   class HttpMethod {
     <<enumeration>>
-    "GET"
-    "POST"
-    "PUT"
-    "DELETE"
-    "PATCH"
+    "GET" | "POST" | "PUT" | "DELETE" | "PATCH"
   }
 
   class ApiEndpoint {
     <<enumeration>>
-    "/users"
-    "/posts"
-    "/comments"
+    "/users" | "/posts" | "/comments"
   }
 
   class RequestConfig {
