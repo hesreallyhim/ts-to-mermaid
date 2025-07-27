@@ -218,14 +218,74 @@ type Handler = ((x: string) => void) | ((x: number) => void);
 note "Handler = ((x: string) => void) | ((x: number) => void)"
 ```
 
+### Rule 11: Mixed Literal and Non-literal Unions
+
+```typescript
+type Mixed = "auto" | number | CustomType;
+type Status = "loading" | "error" | Response;
+```
+
+**→ Use note annotation:**
+
+```mermaid
++mode: Mixed
+note "Mixed = \"auto\" | number | CustomType"
+```
+
+### Rule 12: Template Literal Types
+
+```typescript
+type Pattern = `${string}-${number}`;
+type EventName = `on${Capitalize<string>}`;
+```
+
+**→ Use note annotation:**
+
+```mermaid
++pattern: Pattern
+note "Pattern = `${string}-${number}`"
+```
+
+### Rule 13: Unions with Intersections
+
+```typescript
+type Combined = (A & B) | C;
+type User = (BaseUser & Admin) | Guest;
+```
+
+**→ Use note annotation:**
+
+```mermaid
++user: User
+note "User = (BaseUser & Admin) | Guest"
+```
+
+### Rule 14: Discriminated Union Detection
+
+For discriminated unions, only single-property discriminators are detected:
+
+```typescript
+// Supported - single discriminator "kind"
+type Shape = 
+  | { kind: "circle"; radius: number }
+  | { kind: "square"; side: number };
+
+// Not supported - multiple discriminators treated as complex
+type Event =
+  | { type: "click"; target: "button"; x: number }
+  | { type: "key"; target: "input"; key: string };
+```
+
 ## Quick Decision Tree
 
-1. **Is it a discriminated union?** → Use inheritance
-2. **Is it > 5 string literals?** → Use enumeration
-3. **Is it ≤ 5 simple values?** → Use inline annotation
-4. **Is it reused multiple times?** → Create dedicated type class
-5. **Is it complex/mixed types?** → Use note annotation
-6. **Default** → Use inline annotation
+1. **Is it a discriminated union?** → Use inheritance (single discriminator only)
+2. **Contains template literals or intersections?** → Use note annotation
+3. **Mixes literals with non-literals?** → Use note annotation
+4. **Is it > 5 string/number literals?** → Use enumeration
+5. **Is it ≤ 5 simple values?** → Use inline annotation
+6. **Is it reused multiple times?** → Create dedicated type class
+7. **Is it complex/mixed types?** → Use note annotation
+8. **Default** → Use inline annotation
 
 ## Summary
 
