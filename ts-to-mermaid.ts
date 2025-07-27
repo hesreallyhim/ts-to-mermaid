@@ -93,11 +93,39 @@ class TypeScriptToMermaid {
     ts.forEachChild(node, (child) => this.visit(child));
   }
 
+  private checkNodeForErrors(node: ts.Node): boolean {
+    // Check if the node or its children have syntax errors
+    const sourceFile = node.getSourceFile();
+    const start = node.getStart();
+    const end = node.getEnd();
+    
+    // Get diagnostics for this specific node range
+    const diagnostics = this.program.getSyntacticDiagnostics(sourceFile);
+    
+    // Also check if this node appears incomplete in the source
+    const nodeText = node.getText(sourceFile);
+    const openBraces = (nodeText.match(/{/g) || []).length;
+    const closeBraces = (nodeText.match(/}/g) || []).length;
+    const hasUnmatchedBraces = openBraces !== closeBraces;
+    
+    const hasDiagnostics = diagnostics.some(diag => {
+      if (diag.start === undefined) return false;
+      // Check if the diagnostic is within this node's range
+      return diag.start >= start && diag.start <= end;
+    });
+    
+    return hasDiagnostics || hasUnmatchedBraces;
+  }
+
   private processInterface(node: ts.InterfaceDeclaration): void {
     if (!node.name) return;
     const name = node.name.text;
+    
+    // Check if this node has syntax errors
+    const hasErrors = this.checkNodeForErrors(node);
+    
     const typeInfo: TypeInfo = {
-      name,
+      name: hasErrors ? `${name} [AUTO-FIXED]` : name,
       kind: 'interface',
       properties: [],
       extends: [],
@@ -136,14 +164,18 @@ class TypeScriptToMermaid {
       }
     });
 
-    this.types.set(name, typeInfo);
+    // Use original name as key for relationships to work correctly
+    const originalName = name.replace(' [AUTO-FIXED]', '');
+    this.types.set(originalName, typeInfo);
   }
 
   private processTypeAlias(node: ts.TypeAliasDeclaration): void {
     if (!node.name) return;
     const name = node.name.text;
+    const hasErrors = this.checkNodeForErrors(node);
+    
     const typeInfo: TypeInfo = {
-      name,
+      name: hasErrors ? `${name} [AUTO-FIXED]` : name,
       kind: 'type',
       properties: [],
       typeParameters: node.typeParameters?.map(tp => (tp.name as ts.Identifier)?.text).filter(Boolean),
@@ -184,14 +216,18 @@ class TypeScriptToMermaid {
       });
     }
 
-    this.types.set(name, typeInfo);
+    // Use original name as key for relationships to work correctly
+    const originalName = name.replace(' [AUTO-FIXED]', '');
+    this.types.set(originalName, typeInfo);
   }
 
   private processEnum(node: ts.EnumDeclaration): void {
     if (!node.name) return;
     const name = node.name.text;
+    const hasErrors = this.checkNodeForErrors(node);
+    
     const typeInfo: TypeInfo = {
-      name,
+      name: hasErrors ? `${name} [AUTO-FIXED]` : name,
       kind: 'enum',
       properties: [],
     };
@@ -208,15 +244,19 @@ class TypeScriptToMermaid {
       });
     });
 
-    this.types.set(name, typeInfo);
+    // Use original name as key for relationships to work correctly
+    const originalName = name.replace(' [AUTO-FIXED]', '');
+    this.types.set(originalName, typeInfo);
   }
 
   private processClass(node: ts.ClassDeclaration): void {
     if (!node.name) return;
 
     const name = node.name.text;
+    const hasErrors = this.checkNodeForErrors(node);
+    
     const typeInfo: TypeInfo = {
-      name,
+      name: hasErrors ? `${name} [AUTO-FIXED]` : name,
       kind: 'class',
       properties: [],
       extends: [],
@@ -266,7 +306,9 @@ class TypeScriptToMermaid {
       }
     });
 
-    this.types.set(name, typeInfo);
+    // Use original name as key for relationships to work correctly
+    const originalName = name.replace(' [AUTO-FIXED]', '');
+    this.types.set(originalName, typeInfo);
   }
 
   private getTypeString(typeNode: ts.TypeNode): string {
@@ -375,10 +417,26 @@ class TypeScriptToMermaid {
       }
       lines.push('');
     }
+    
+    // Check if any types were auto-fixed
+    const autoFixedTypes = Array.from(this.types.values()).filter(t => t.name.includes('[AUTO-FIXED]'));
+    if (autoFixedTypes.length > 0) {
+      lines.push('  %% WARNING: The following types had syntax errors and were auto-recovered by the TypeScript parser:');
+      autoFixedTypes.forEach(type => {
+        const originalName = type.name.replace(' [AUTO-FIXED]', '');
+        lines.push(`  %% - ${originalName}: Missing closing brace or other syntax error was automatically fixed`);
+      });
+      lines.push('  %% These auto-fixes may not reflect the intended structure!');
+      lines.push('');
+    }
 
     // Generate class definitions
-    for (const [name, typeInfo] of this.types) {
-      lines.push(`  class ${name} {`);
+    for (const [, typeInfo] of this.types) {
+      // Remove [AUTO-FIXED] marker for the class name
+      const className = typeInfo.name.replace(' [AUTO-FIXED]', '');
+      const isAutoFixed = typeInfo.name.includes('[AUTO-FIXED]');
+      
+      lines.push(`  class ${className} {`);
 
       // Add type kind annotation
       if (typeInfo.kind === 'interface') {
@@ -389,6 +447,11 @@ class TypeScriptToMermaid {
         lines.push(`    <<enumeration>>`);
       } else if (typeInfo.kind === 'class') {
         lines.push(`    <<class>>`);
+      }
+      
+      // Add AUTO-FIXED warning with emoji
+      if (isAutoFixed) {
+        lines.push(`    ⚠️ AUTO-FIXED ⚠️`);
       }
 
       // Add properties or union members
@@ -425,6 +488,7 @@ class TypeScriptToMermaid {
         lines.push(`  ${rel.from} ${arrow} ${rel.to}${label}`);
       }
     }
+    
 
     return lines.join('\n');
   }
