@@ -7,7 +7,9 @@ Convert TypeScript interfaces, types, and classes into Mermaid class diagrams.
 - 🔍 Analyzes TypeScript files using the TypeScript Compiler API
 - 🏗️ Detects inheritance, implementation, and composition relationships
 - 📊 Generates clean Mermaid class diagram syntax
-- 🎯 Handles complex types including unions, generics, and enums
+- 🎯 Smart union type handling based on complexity
+- 🔄 Detects and visualizes discriminated unions as inheritance hierarchies
+- 📝 Inline annotations for simple unions (≤5 values)
 - ⚠️ Continues processing files with syntax errors and marks auto-fixed types
 - 📦 Single file solution with minimal dependencies
 
@@ -78,6 +80,87 @@ classDiagram
   UserProfile --|> BaseProfile
   User --* UserProfile : profile
   Admin --|> User
+```
+
+## Union Type Handling
+
+The converter intelligently handles different types of unions:
+
+### Simple Unions (≤5 values)
+Rendered inline in properties:
+```typescript
+interface Settings {
+  theme: "light" | "dark";
+  size: "sm" | "md" | "lg";
+}
+```
+→
+```mermaid
+class Settings {
+  <<interface>>
+  +theme: "light" or "dark"
+  +size: "sm" or "md" or "lg"
+}
+```
+
+### Large Unions (>5 values)
+Created as enumeration classes:
+```typescript
+type Status = "active" | "inactive" | "pending" | "suspended" | "archived" | "deleted";
+```
+→
+```mermaid
+class Status {
+  <<enumeration>>
+  "active"
+  "inactive"
+  "pending"
+  "suspended"
+  "archived"
+  "deleted"
+}
+```
+
+### Discriminated Unions
+Converted to inheritance hierarchies:
+```typescript
+type Shape = 
+  | { kind: "circle"; radius: number }
+  | { kind: "rectangle"; width: number; height: number };
+```
+→
+```mermaid
+class Shape {
+  <<interface>>
+  +kind: string
+}
+class CircleShape {
+  <<interface>>
+  +kind: "circle"
+  +radius: number
+}
+class RectangleShape {
+  <<interface>>
+  +kind: "rectangle"
+  +width: number
+  +height: number
+}
+CircleShape ..|> Shape
+RectangleShape ..|> Shape
+```
+
+### Complex Unions
+Documented with note annotations:
+```typescript
+type MixedData = string | number | User | { custom: boolean };
+```
+→
+```mermaid
+class MixedData {
+  <<enumeration>>
+  +value: MixedData
+}
+note for MixedData "MixedData = string | number | User | Object"
 ```
 
 ## Error Handling
