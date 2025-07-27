@@ -19,7 +19,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/ts-to-mermaid.git"
+    "url": "https://github.com/hesreallyhim/ts-to-mermaid.git"
   },
   "keywords": [
     "typescript",
