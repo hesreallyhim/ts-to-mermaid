@@ -1,0 +1,191 @@
+classDiagram
+  %% Legend
+  %% --|> : Inheritance (extends)
+  %% ..|> : Implementation (implements)
+  %% --* : Composition (has/contains)
+  %% -- : Association
+
+  class NestedSimple {
+    <<enumeration>>
+    +value: NestedSimple
+  }
+
+  class DoubleNested {
+    <<enumeration>>
+    +value: DoubleNested
+  }
+
+  class GenericUnion {
+    <<enumeration>>
+    +value: GenericUnion
+  }
+
+  class ConstrainedUnion {
+    <<enumeration>>
+    +value: ConstrainedUnion
+  }
+
+  class FunctionUnion {
+    <<enumeration>>
+    +value: FunctionUnion
+  }
+
+  class MixedFunctionUnion {
+    <<enumeration>>
+    +value: MixedFunctionUnion
+  }
+
+  class ConditionalUnion {
+  }
+
+  class MappedUnion {
+  }
+
+  class JSONValue {
+    <<enumeration>>
+    +value: JSONValue
+  }
+
+  class JSONObject {
+    <<interface>>
+  }
+
+  class JSONArray {
+    <<interface>>
+  }
+
+  class ArrayUnion {
+    <<enumeration>>
+    +value: ArrayUnion
+  }
+
+  class MixedArrayUnion {
+    <<enumeration>>
+    +value: MixedArrayUnion
+  }
+
+  class ObjectUnion {
+    <<interface>>
+    +type: string
+  }
+
+  class AObjectUnion {
+    <<interface>>
+    +type: "a"
+    +value: string
+  }
+
+  class BObjectUnion {
+    <<interface>>
+    +type: "b"
+    +value: number
+  }
+
+  class MixedObjectUnion {
+    <<enumeration>>
+    +value: MixedObjectUnion
+  }
+
+  class OptionalUnion {
+    <<enumeration>>
+    string | undefined
+  }
+
+  class NullableUnion {
+    <<enumeration>>
+    null | number
+  }
+
+  class BothUnion {
+    <<enumeration>>
+    boolean | null | undefined
+  }
+
+  class KitchenSink {
+    <<enumeration>>
+    +value: KitchenSink
+  }
+
+  class UserId {
+  }
+
+  class ProductId {
+  }
+
+  class IdUnion {
+    <<enumeration>>
+    +value: IdUnion
+  }
+
+  class SymbolUnion {
+    <<enumeration>>
+    +value: SymbolUnion
+  }
+
+  class Color {
+    <<enumeration>>
+    +Red: number
+    +Green: number
+    +Blue: number
+  }
+
+  class Size {
+    <<enumeration>>
+    +Small: number
+    +Medium: number
+    +Large: number
+  }
+
+  class EnumUnion {
+    <<enumeration>>
+    +value: EnumUnion
+  }
+
+  class MixedEnumUnion {
+    <<enumeration>>
+    +value: MixedEnumUnion
+  }
+
+  class IsArray {
+  }
+
+  class UnwrapArray {
+  }
+
+  class EdgeCaseTests {
+    <<interface>>
+    +nested: NestedSimple
+    +generic: GenericUnion~string~
+    +func: FunctionUnion
+    +json: JSONValue
+    +array: ArrayUnion
+    -optional?: OptionalUnion
+    +kitchen: KitchenSink
+    +enumValue: EnumUnion
+  }
+
+  AObjectUnion ..|> ObjectUnion
+  BObjectUnion ..|> ObjectUnion
+  EdgeCaseTests --* NestedSimple : nested
+  EdgeCaseTests --* FunctionUnion : func
+  EdgeCaseTests --* JSONValue : json
+  EdgeCaseTests --* ArrayUnion : array
+  EdgeCaseTests --* OptionalUnion : optional
+  EdgeCaseTests --* KitchenSink : kitchen
+  EdgeCaseTests --* EnumUnion : enumValue
+
+  note for NestedSimple "NestedSimple = (string | number) | (boolean | null)"
+  note for DoubleNested "DoubleNested = ((string | number) | boolean) | (null | undefined)"
+  note for GenericUnion "GenericUnion = T | null"
+  note for ConstrainedUnion "ConstrainedUnion = T | "default""
+  note for FunctionUnion "FunctionUnion = ((x: string) => void) | ((x: number) => number)"
+  note for MixedFunctionUnion "MixedFunctionUnion = (() => void) | string | number"
+  note for JSONValue "JSONValue = string | number | boolean | null | JSONObject | JSONArray"
+  note for ArrayUnion "ArrayUnion = string[] | number[] | [string, number]"
+  note for MixedArrayUnion "MixedArrayUnion = string | string[] | Array<string | number>"
+  note for MixedObjectUnion "MixedObjectUnion = string | Object | Object"
+  note for KitchenSink "KitchenSink = string | number | boolean | null | undefined | Object | [string, number] | (() => void) | Array<any>"
+  note for IdUnion "IdUnion = UserId | ProductId | string"
+  note for SymbolUnion "SymbolUnion = typeof sym1 | typeof sym2 | symbol"
+  note for EnumUnion "EnumUnion = Color | Size"
+  note for MixedEnumUnion "MixedEnumUnion = Color.Red | Size.Large | "custom""

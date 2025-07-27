@@ -1,0 +1,138 @@
+classDiagram
+  %% Legend
+  %% --|> : Inheritance (extends)
+  %% ..|> : Implementation (implements)
+  %% --* : Composition (has/contains)
+  %% -- : Association
+
+  class USState {
+    <<enumeration>>
+    <<type>>
+    "AK" | "AL" | "AR" | "AZ" | "CA" | "CO" | "CT" | "DE" | "FL" | "GA" | "HI" | "IA" | "ID" | "IL" | "IN" | "KS" | "KY" | "LA" | "MA" | "MD" | "ME" | "MI" | "MN" | "MO" | "MS" | "MT" | "NC" | "ND" | "NE" | "NH" | "NJ" | "NM" | "NV" | "NY" | "OH" | "OK" | "OR" | "PA" | "RI" | "SC" | "SD" | "TN" | "TX" | "UT" | "VA" | "VT" | "WA" | "WI" | "WV" | "WY"
+  }
+
+  class Month {
+    <<enumeration>>
+    <<type>>
+    "April" | "August" | "December" | "February" | "January" | "July" | "June" | "March" | "May" | "November" | "October" | "September"
+  }
+
+  class HttpStatusCode {
+    <<enumeration>>
+    <<type>>
+    200 | 201 | 202 | 203 | 204 | 205 | 206 | 300 | 301 | 302 | 303 | 304 | 307 | 308 | 400 | 401 | 403 | 404 | 405 | 406 | 407 | 408 | 409 | 410 | 500 | 501 | 502 | 503 | 504 | 505
+  }
+
+  class DiceRoll {
+    <<enumeration>>
+    1
+    2
+    3
+    4
+    5
+    6
+  }
+
+  class HexDigit {
+    <<enumeration>>
+    "0"
+    "1"
+    "2"
+    "3"
+    "4"
+    "5"
+    "6"
+    "7"
+    "8"
+    "9"
+    "A"
+    "B"
+    "C"
+    "D"
+    "E"
+    "F"
+  }
+
+  class EventType {
+    <<enumeration>>
+    "blur"
+    "change"
+    "click"
+    "dblclick"
+    "focus"
+    "input"
+    "keydown"
+    "keypress"
+    "keyup"
+    "load"
+    "mousedown"
+    "mouseenter"
+    "mouseleave"
+    "mousemove"
+    "mouseup"
+    "resize"
+    "scroll"
+    "submit"
+    "unload"
+  }
+
+  class Address {
+    <<interface>>
+    +street: string
+    +city: string
+    +state: USState
+    +zip: string
+  }
+
+  class DateSelector {
+    <<interface>>
+    +month: Month
+    +day: number
+    +year: number
+  }
+
+  class ApiResponse {
+    <<interface>>
+    +status: HttpStatusCode
+    +message: string
+    -data?: any
+  }
+
+  class RegionalSettings {
+    +state: USState
+    +defaultMonth: Month
+    +preferredEvents: EventTypeArray~~
+  }
+
+  class GameDice {
+    <<class>>
+  }
+
+  class LargeUnionCollection {
+    <<interface>>
+    +state: USState
+    +month: Month
+    +statusCode: HttpStatusCode
+    +diceValue: DiceRoll
+    +hexValue: HexDigit
+    +eventType: EventType
+  }
+
+  class StateData {
+    +state: T
+    +population: number
+    +capital: string
+  }
+
+  Address --* USState : state
+  DateSelector --* Month : month
+  ApiResponse --* HttpStatusCode : status
+  RegionalSettings --* USState : state
+  RegionalSettings --* Month : defaultMonth
+  RegionalSettings --* EventType : preferredEvents
+  LargeUnionCollection --* USState : state
+  LargeUnionCollection --* Month : month
+  LargeUnionCollection --* HttpStatusCode : statusCode
+  LargeUnionCollection --* DiceRoll : diceValue
+  LargeUnionCollection --* HexDigit : hexValue
+  LargeUnionCollection --* EventType : eventType

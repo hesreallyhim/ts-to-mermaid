@@ -1,0 +1,141 @@
+classDiagram
+  %% Legend
+  %% --|> : Inheritance (extends)
+  %% ..|> : Implementation (implements)
+  %% --* : Composition (has/contains)
+  %% -- : Association
+
+  class Size {
+    <<enumeration>>
+    <<type>>
+    "large" | "medium" | "small"
+  }
+
+  class Status {
+    <<enumeration>>
+    <<type>>
+    "active" | "inactive"
+  }
+
+  class YesNo {
+    <<enumeration>>
+    <<type>>
+    "no" | "yes"
+  }
+
+  class Rating {
+    <<enumeration>>
+    1 | 2 | 3 | 4 | 5
+  }
+
+  class Priority {
+    <<enumeration>>
+    <<type>>
+    0 | 1 | 2
+  }
+
+  class HttpSuccessCodes {
+    <<enumeration>>
+    200 | 201 | 204
+  }
+
+  class TrueFalse {
+    <<enumeration>>
+    false | true
+  }
+
+  class MaybeBool {
+    <<enumeration>>
+    boolean | null
+  }
+
+  class Toggle {
+    <<enumeration>>
+    "off" | "on" | 0 | 1
+  }
+
+  class Answer {
+    <<enumeration>>
+    "no" | "yes" | false | true
+  }
+
+  class Direction {
+    <<enumeration>>
+    "center" | "east" | "north" | "south" | "west"
+  }
+
+  class Weekday {
+    <<enumeration>>
+    "fri" | "mon" | "thu" | "tue" | "wed"
+  }
+
+  class UserSettings {
+    <<interface>>
+    +theme: "light" or "dark"
+    +language: "en" or "es" or "fr"
+    +size: Size
+    +autoSave: YesNo
+    +priority: Priority
+  }
+
+  class ButtonProps {
+    <<interface>>
+    +variant: "primary" or "secondary" or "danger"
+    +size: "sm" or "md" or "lg"
+    -disabled?: boolean
+  }
+
+  class Config {
+    +mode: "dev" or "prod" or "test"
+    +level: 1 or 2 or 3
+    +feature: "basic" or "pro"
+    +status: Status
+  }
+
+  class MenuItem {
+    <<class>>
+  }
+
+  class Navigation {
+    <<interface>>
+    +position: "top" or "bottom" or "left" or "right"
+    +items: ObjectArray~~
+  }
+
+  class SimpleOption {
+    +value: T
+    +label: string
+  }
+
+  class AllSimpleUnions {
+    <<interface>>
+    +size: Size
+    +status: Status
+    +yesNo: YesNo
+    +rating: Rating
+    +priority: Priority
+    +httpCode: HttpSuccessCodes
+    +bool: TrueFalse
+    +maybe: MaybeBool
+    +toggle: Toggle
+    +answer: Answer
+    +direction: Direction
+    +weekday: Weekday
+  }
+
+  UserSettings --* Size : size
+  UserSettings --* YesNo : autoSave
+  UserSettings --* Priority : priority
+  Config --* Status : status
+  AllSimpleUnions --* Size : size
+  AllSimpleUnions --* Status : status
+  AllSimpleUnions --* YesNo : yesNo
+  AllSimpleUnions --* Rating : rating
+  AllSimpleUnions --* Priority : priority
+  AllSimpleUnions --* HttpSuccessCodes : httpCode
+  AllSimpleUnions --* TrueFalse : bool
+  AllSimpleUnions --* MaybeBool : maybe
+  AllSimpleUnions --* Toggle : toggle
+  AllSimpleUnions --* Answer : answer
+  AllSimpleUnions --* Direction : direction
+  AllSimpleUnions --* Weekday : weekday
