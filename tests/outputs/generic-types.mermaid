@@ -22,9 +22,20 @@ classDiagram
   }
 
   class Result {
-    <<enumeration>>
-    Object
-    Object
+    <<interface>>
+    +success: string
+  }
+
+  class TrueResult {
+    <<interface>>
+    +success: "true"
+    +data: T
+  }
+
+  class FalseResult {
+    <<interface>>
+    +success: "false"
+    +error: E
   }
 
   class Optional {
@@ -76,6 +87,8 @@ classDiagram
     +user: User
   }
 
+  TrueResult ..|> Result
+  FalseResult ..|> Result
   NumericStack --|> Stack
   UserRepository ..|> Container
   UserRepository --* User : user

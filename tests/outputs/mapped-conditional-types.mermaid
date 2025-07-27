@@ -107,10 +107,26 @@ classDiagram
   }
 
   class Action {
-    <<enumeration>>
-    Object
-    Object
-    Object
+    <<interface>>
+    +type: string
+  }
+
+  class ADDAction {
+    <<interface>>
+    +type: "ADD"
+    +payload: Object
+  }
+
+  class REMOVEAction {
+    <<interface>>
+    +type: "REMOVE"
+    +payload: Object
+  }
+
+  class UPDATEAction {
+    <<interface>>
+    +type: "UPDATE"
+    +payload: Object
   }
 
   class ActionType {
@@ -202,3 +218,7 @@ classDiagram
   class Intersection {
     +value: UnionToIntersection~Union~
   }
+
+  ADDAction ..|> Action
+  REMOVEAction ..|> Action
+  UPDATEAction ..|> Action

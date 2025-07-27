@@ -55,10 +55,25 @@ classDiagram
   }
 
   class ApiResponse {
-    <<enumeration>>
-    Object
-    Object
-    Object
+    <<interface>>
+    +status: string
+  }
+
+  class SuccessApiResponse {
+    <<interface>>
+    +status: "success"
+    +data: any
+  }
+
+  class ErrorApiResponse {
+    <<interface>>
+    +status: "error"
+    +message: string
+  }
+
+  class LoadingApiResponse {
+    <<interface>>
+    +status: "loading"
   }
 
   class Task {
@@ -77,9 +92,21 @@ classDiagram
   }
 
   class NestedStatus {
-    <<enumeration>>
-    Object
-    Object
+    <<interface>>
+    +type: string
+  }
+
+  class SimpleNestedStatus {
+    <<interface>>
+    +type: "simple"
+    +value: Status
+  }
+
+  class ComplexNestedStatus {
+    <<interface>>
+    +type: "complex"
+    +primary: Status
+    +secondary: OptionalStatus
   }
 
   class HttpMethod {
@@ -98,11 +125,19 @@ classDiagram
     -status?: OptionalStatus
   }
 
+  SuccessApiResponse ..|> ApiResponse
+  ErrorApiResponse ..|> ApiResponse
+  LoadingApiResponse ..|> ApiResponse
+  SimpleNestedStatus ..|> NestedStatus
+  ComplexNestedStatus ..|> NestedStatus
   Task --* Priority : priority
   Task --* Status : status
   Task --* ColorName : color
   StateManager --* Status : currentState
   StateManager --* Status : previousStates
+  SimpleNestedStatus --* Status : value
+  ComplexNestedStatus --* Status : primary
+  ComplexNestedStatus --* OptionalStatus : secondary
   RequestConfig --* HttpMethod : method
   RequestConfig --* ApiEndpoint : endpoint
   RequestConfig --* OptionalStatus : status

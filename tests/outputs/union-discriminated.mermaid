@@ -1,0 +1,147 @@
+classDiagram
+  %% Legend
+  %% --|> : Inheritance (extends)
+  %% ..|> : Implementation (implements)
+  %% --* : Composition (has/contains)
+  %% -- : Association
+
+  %% Errors encountered during conversion:
+  %% - TS2300: Duplicate identifier 'Event'.
+
+  class Shape {
+    <<interface>>
+    +kind: string
+  }
+
+  class CircleShape {
+    <<interface>>
+    +kind: "circle"
+    +radius: number
+  }
+
+  class RectangleShape {
+    <<interface>>
+    +kind: "rectangle"
+    +width: number
+    +height: number
+  }
+
+  class TriangleShape {
+    <<interface>>
+    +kind: "triangle"
+    +base: number
+    +height: number
+  }
+
+  class Event {
+    <<interface>>
+    +type: string
+  }
+
+  class ClickEvent {
+    <<interface>>
+    +type: "click"
+    +x: number
+    +y: number
+  }
+
+  class KeypressEvent {
+    <<interface>>
+    +type: "keypress"
+    +key: string
+    +modifiers: stringArray~~
+  }
+
+  class ScrollEvent {
+    <<interface>>
+    +type: "scroll"
+    +deltaY: number
+  }
+
+  class ApiResponse {
+    <<interface>>
+    +status: string
+  }
+
+  class SuccessApiResponse {
+    <<interface>>
+    +status: "success"
+    +data: any
+  }
+
+  class ErrorApiResponse {
+    <<interface>>
+    +status: "error"
+    +error: string
+    +code: number
+  }
+
+  class LoadingApiResponse {
+    <<interface>>
+    +status: "loading"
+  }
+
+  class Animal {
+    <<interface>>
+    +species: string
+  }
+
+  class DogAnimal {
+    <<interface>>
+    +species: "dog"
+    +breed: string
+    +goodBoy: boolean
+  }
+
+  class CatAnimal {
+    <<interface>>
+    +species: "cat"
+    +breed: string
+    +livesRemaining: number
+  }
+
+  class BirdAnimal {
+    <<interface>>
+    +species: "bird"
+    +wingspan: number
+    +canFly: boolean
+  }
+
+  class ShapeContainer {
+    <<interface>>
+    +id: string
+    +shape: Shape
+  }
+
+  class EventHandler {
+    <<interface>>
+    +name: string
+  }
+
+  class MultiDiscriminator {
+    <<enumeration>>
+    Object
+    Object
+    Object
+  }
+
+  class NotDiscriminated {
+    <<enumeration>>
+    Object
+    Object
+    Object
+  }
+
+  CircleShape ..|> Shape
+  RectangleShape ..|> Shape
+  TriangleShape ..|> Shape
+  ClickEvent ..|> Event
+  KeypressEvent ..|> Event
+  ScrollEvent ..|> Event
+  SuccessApiResponse ..|> ApiResponse
+  ErrorApiResponse ..|> ApiResponse
+  LoadingApiResponse ..|> ApiResponse
+  DogAnimal ..|> Animal
+  CatAnimal ..|> Animal
+  BirdAnimal ..|> Animal
+  ShapeContainer --* Shape : shape

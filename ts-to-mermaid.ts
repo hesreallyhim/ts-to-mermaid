@@ -199,6 +199,13 @@ class TypeScriptToMermaid {
       // Classify the union type
       typeInfo.unionMetadata = this.classifyUnion(node.type);
 
+      // For discriminated unions, create separate types for each variant
+      if (typeInfo.unionMetadata.kind === 'discriminated' && typeInfo.unionMetadata.discriminator) {
+        this.processDiscriminatedUnion(name, node.type, typeInfo.unionMetadata.discriminator);
+        // Don't add the union type itself to the types map
+        return;
+      }
+
       // Skip creating union relationships since we're rendering as enumeration
       // This keeps the diagram cleaner
     }
@@ -569,6 +576,83 @@ class TypeScriptToMermaid {
     return null;
   }
 
+  private processDiscriminatedUnion(baseName: string, unionNode: ts.UnionTypeNode, discriminator: string): void {
+    // Create the base interface with the discriminator property
+    const baseTypeInfo: TypeInfo = {
+      name: baseName,
+      kind: 'interface',
+      properties: [{
+        name: discriminator,
+        type: 'string',
+        optional: false,
+        readonly: false
+      }]
+    };
+    this.types.set(baseName, baseTypeInfo);
+
+    // Process each variant
+    unionNode.types.forEach((variantType, index) => {
+      if (ts.isTypeLiteralNode(variantType)) {
+        let variantName = '';
+        let discriminatorValue = '';
+
+        // Find the discriminator value
+        variantType.members.forEach(member => {
+          if (ts.isPropertySignature(member) && 
+              member.name && 
+              ts.isIdentifier(member.name) && 
+              member.name.text === discriminator &&
+              member.type &&
+              ts.isLiteralTypeNode(member.type)) {
+            discriminatorValue = member.type.literal.getText(this.sourceFile).replace(/['"]/g, '');
+            // Generate variant name from discriminator value
+            variantName = discriminatorValue.charAt(0).toUpperCase() + discriminatorValue.slice(1) + baseName;
+          }
+        });
+
+        if (!variantName) {
+          variantName = `${baseName}Variant${index + 1}`;
+        }
+
+        // Create the variant type
+        const variantTypeInfo: TypeInfo = {
+          name: variantName,
+          kind: 'interface',
+          properties: []
+        };
+
+        // Add all properties from the variant
+        variantType.members.forEach(member => {
+          if (ts.isPropertySignature(member) && member.name) {
+            const propName = member.name.getText(this.sourceFile);
+            let propType = member.type ? this.getTypeStringForProperty(member.type) : 'any';
+            
+            // For the discriminator property, use the literal value
+            if (propName === discriminator && discriminatorValue) {
+              propType = `"${discriminatorValue}"`;
+            }
+
+            variantTypeInfo.properties.push({
+              name: propName,
+              type: propType,
+              optional: !!member.questionToken,
+              readonly: !!member.modifiers?.some(m => m.kind === ts.SyntaxKind.ReadonlyKeyword),
+            });
+          }
+        });
+
+        this.types.set(variantName, variantTypeInfo);
+
+        // Add implementation relationship
+        this.relationships.push({
+          from: variantName,
+          to: baseName,
+          type: 'implements'
+        });
+      }
+    });
+  }
+
   generateMermaid(): string {
     const lines: string[] = ['classDiagram'];
 
@@ -641,8 +725,15 @@ class TypeScriptToMermaid {
           }
             
           case 'large':
+            // For large unions, use enumeration
+            for (const unionType of typeInfo.unionTypes) {
+              lines.push(`    ${unionType}`);
+            }
+            break;
+            
           case 'discriminated':
-            // For large unions and discriminated unions (for now), use enumeration
+            // For discriminated unions, we'll handle them differently
+            // For now, show as enumeration until we implement full support
             for (const unionType of typeInfo.unionTypes) {
               lines.push(`    ${unionType}`);
             }
